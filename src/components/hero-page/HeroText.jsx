@@ -8,7 +8,7 @@ const HeroText = () => {
                 <p className="cus_font2 text-7xl text-white">See Your Credit Score instantly!</p>
                 <p className="text-4xl text-white">Check your Credit Score and monitor your credit now</p>
             </div>
-            <div className='flex flex-row justify-center items-center gap-5 text-white'>
+            <div className='flex flex-row justify-center items-center gap-4 text-white'>
                 <div className='flex flex-row justify-center items-center'>
                     <span className='text-3xl'><MdDoneOutline /></span>
                     <p>7 days Trial with $1.00 Processing Fee </p>
