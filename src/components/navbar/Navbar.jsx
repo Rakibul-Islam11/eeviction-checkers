@@ -6,7 +6,7 @@ import img4 from '../../assets/images/tranunino.avif'
 
 const Navbar = () => {
     return (
-        <div className='sticky top-0 z-50 bg-white'>
+        <div className='sticky top-0 z-50 bg-white shadow-xl'>
             <div className='w-[85%] h-[110px] px-4  mx-auto flex items-center '>
                 <div className='flex flex-row items-center justify-between w-full'>
                     <div className='flex flex-row gap-2 text-2xl font-bold cus_font'>

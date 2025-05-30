@@ -6,7 +6,7 @@ import './home.css'
 
 const Home = () => {
     return (
-        <div className=" pb-8 pt-8">
+        <div className=" pb-8">
             <div>
                 <HeroAllDesgin></HeroAllDesgin>
                 <ByContinue></ByContinue>
