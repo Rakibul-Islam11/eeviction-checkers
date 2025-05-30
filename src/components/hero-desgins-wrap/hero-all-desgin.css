@@ -1,0 +1,8 @@
+.for_bg_image {
+
+    height: fit-content;
+    background-image: url('../../assets/bg-image/always-grey-1920x1080.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
