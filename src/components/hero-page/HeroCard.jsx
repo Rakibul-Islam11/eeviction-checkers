@@ -24,32 +24,34 @@ const HeroCard = () => {
     ];
 
     return (
-        <div className="py-10 px-4 bg-white w-[70%] mx-auto mt-12 ">
+        <div className="py-10 px-4 bg-white w-full md:w-[85%] lg:w-[70%] mx-auto mt-12">
             {/* Heading */}
             <div className="text-center mb-8">
-                <h2 className="text-4xl text-[#333333] font-bold">Choose your pricing plan</h2>
-                <p className="text-gray-600 text-lg">Find one that works for you</p>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl text-[#333333] font-bold">Choose your pricing plan</h2>
+                <p className="text-sm sm:text-base text-gray-600">Find one that works for you</p>
             </div>
 
             {/* Grid Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto ">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {plans.map((plan, index) => (
-                    <div key={index} className="bg-white shadow-md border border-black rounded-md overflow-hidden flex flex-col justify-between ">
+                    <div
+                        key={index}
+                        className="bg-white shadow-md border border-black rounded-md overflow-hidden flex flex-col justify-between"
+                    >
                         {/* Image with badge */}
                         <div className="relative">
-                            <img src={cardimg} alt="card" className="w-full h-[160px] object-cover" />
-                            <span className="absolute bottom-[-9px] left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-[13px] px-3 py-0 font-bold rounded">
+                            <img src={cardimg} alt="card" className="w-full h-[140px] sm:h-[160px] object-cover" />
+                            <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-[12px] sm:text-[13px] px-3 py-[2px] font-bold rounded">
                                 Best Value
                             </span>
                         </div>
 
-
                         {/* Plan Details */}
-                        <div className="p-6 text-center flex flex-col justify-between gap-4 flex-grow">
+                        <div className="p-4 sm:p-6 text-center flex flex-col justify-between gap-4 flex-grow">
                             <div>
-                                <h3 className="text-lg font-semibold mb-1">{plan.title}</h3>
-                                <div className="text-7xl font-bold text-gray-900 mb-1">
-                                    <span className="text-2xl align-top">$</span>{plan.price}
+                                <h3 className="text-base sm:text-lg font-semibold mb-1">{plan.title}</h3>
+                                <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-1">
+                                    <span className="text-base sm:text-xl align-top">$</span>{plan.price}
                                 </div>
                                 <p className="text-gray-600 text-sm">{plan.cycle}</p>
                                 {plan.setup && <p className="text-gray-500 text-sm">{plan.setup}</p>}
@@ -57,12 +59,10 @@ const HeroCard = () => {
 
                             <div>
                                 <p className="text-sm text-gray-500 mb-2">Valid until canceled</p>
-
-                                <button className="bg-blue-600 text-white px-6 py-2 rounded w-full">
+                                <button className="bg-blue-600 text-white px-4 py-2 sm:px-6 sm:py-2 rounded w-full">
                                     Select
                                 </button>
 
-                                {/* Horizontal line */}
                                 <div className="border-t border-gray-200 my-3"></div>
 
                                 <div className="flex items-center justify-center gap-2 mt-3 text-sm text-gray-600">
@@ -70,7 +70,6 @@ const HeroCard = () => {
                                     <span>Credit score</span>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 ))}
