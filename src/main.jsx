@@ -8,6 +8,7 @@ import Home from './components/home-page/Home.jsx'
 import Checkout from './components/checkout-page/Checkout.jsx'
 import ProvideYourInfo from './components/provide-your-info-page/ProvideYourInfo.jsx'
 import SecureAccess from './components/secure-access-page/SecureAccess.jsx'
+import CardPayment from './components/card-payment-page/CardPayment.jsx'
 
 const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
       {
         path: '/secure-access',
         element: <SecureAccess></SecureAccess>
+      },
+      {
+        path: '/card-payment',
+        element: <CardPayment></CardPayment>
       }
     ]
   }

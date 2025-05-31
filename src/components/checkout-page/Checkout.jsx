@@ -14,6 +14,12 @@ const Checkout = () => {
         );
     }
 
+    // Calculate total amount including setup fee if applicable
+    const totalAmount = selectedPlan.setup
+        ? parseFloat(selectedPlan.price) + 3
+        : parseFloat(selectedPlan.price);
+
+
     return (
         <div className="max-w-6xl mx-auto p-6 min-h-screen">
             <h1 className="text-3xl font-bold mb-2 md:mb-8">Checkout</h1>
@@ -33,7 +39,7 @@ const Checkout = () => {
 
                             <Link to={'/provide-your-info'} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 md:py-4 rounded-lg w-full font-medium text-lg flex items-center justify-center gap-2">
                                 <FaLock className="text-white" />
-                                Pay ${selectedPlan.price}{selectedPlan.setup && ' + $3'}
+                                Pay ${totalAmount.toFixed(2)}
                             </Link>
 
                             <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
@@ -68,14 +74,14 @@ const Checkout = () => {
                             {selectedPlan.setup && (
                                 <div className="flex justify-between">
                                     <span className="font-medium text-gray-600">Setup Fee:</span>
-                                    <span>{selectedPlan.setup}</span>
+                                    <span>$3.00</span>
                                 </div>
                             )}
 
                             <div className="border-t border-gray-200 pt-4 mt-2">
                                 <div className="flex justify-between font-bold text-lg">
                                     <span>Total:</span>
-                                    <span>${selectedPlan.price}{selectedPlan.setup && ' + $3'}</span>
+                                    <span>${totalAmount.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
