@@ -41,10 +41,10 @@ const CheckersPage = () => {
                         <div className='flex flex-row items-center justify-between'>
                             <label className="block text-sm font-medium mb-2">Prepaid Card</label>
                             <div className='flex flex-row items-center'>
-                                <img className='h-9' src={vislogo} alt="" />
-                                <img className='h-9' src={masterLogo} alt="" />
-                                <img className='h-9' src={amez} alt="" />
-                                <img className='h-9' src={disc} alt="" />
+                                <img className='h-6 md:h-9' src={vislogo} alt="" />
+                                <img className='h-6 md:h-9' src={masterLogo} alt="" />
+                                <img className='h-6 md:h-9' src={amez} alt="" />
+                                <img className='h-6 md:h-9' src={disc} alt="" />
                             </div>
                         </div>
                        
