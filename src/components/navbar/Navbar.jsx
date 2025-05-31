@@ -4,6 +4,7 @@ import img1 from '../../assets/images/cir.avif';
 import img2 from '../../assets/images/equifix.avif';
 import img3 from '../../assets/images/exprei.avif';
 import img4 from '../../assets/images/tranunino.avif';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -15,16 +16,18 @@ const Navbar = () => {
     return (
         <>
             {/* Navbar */}
-            <div className="sticky top-0 z-50 bg-white shadow-xl">
+            <div className="sticky top-0 z-50 bg-white shadow-xl ">
                 <div className="w-[85%] h-[110px] px-4 mx-auto flex items-center justify-between">
                     {/* Logo */}
                     <div className="flex flex-row gap-2 text-2xl font-bold cus_font">
-                        <h1 className="text-[#0057e1]">Eviction</h1>
-                        <h1 className="text-[#ff8c4f]">Checkers</h1>
+                        
+                        <Link><h1 className="text-[#0057e1]">Eviction</h1></Link>
+                        <Link><h1 className="text-[#ff8c4f]">Checkers</h1></Link>
                     </div>
 
                     {/* Images (Desktop only) */}
                     <div className="hidden md:flex flex-row justify-center items-center gap-3">
+                        
                         <img src={img4} alt="img4" />
                         <img src={img2} alt="img2" />
                         <img src={img3} alt="img3" />

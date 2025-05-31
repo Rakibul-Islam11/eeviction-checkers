@@ -1,27 +1,40 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import cardimg from '../../assets/card-image/3b51c9_262503d50e06460cb618cfbb0a5b0ba8~mv2.avif';
 import { FaRegCreditCard } from 'react-icons/fa';
 
 const HeroCard = () => {
+    const navigate = useNavigate();
+    const [selectedPlan, setSelectedPlan] = useState(null);
+
     const plans = [
         {
+            id: 1,
             title: 'Standard Quarterly Plan',
             price: '119.85',
             cycle: 'Every 3 months',
             setup: '',
         },
         {
+            id: 2,
             title: 'Basic Monthly Plan',
             price: '39.95',
             cycle: 'Every month',
             setup: '+$3 Setup fee',
         },
         {
+            id: 3,
             title: 'Premium Semi-Annual Plan',
             price: '239.70',
             cycle: 'Every 6 months',
             setup: '',
         },
     ];
+
+    const handleSelectPlan = (plan) => {
+        setSelectedPlan(plan);
+        navigate('/checkout', { state: { selectedPlan: plan } });
+    };
 
     return (
         <div className="py-10 px-4 bg-white w-full md:w-[85%] lg:w-[70%] mx-auto mt-12">
@@ -35,15 +48,17 @@ const HeroCard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {plans.map((plan, index) => (
                     <div
-                        key={index}
+                        key={plan.id}
                         className="bg-white shadow-md border border-black rounded-md overflow-hidden flex flex-col justify-between"
                     >
                         {/* Image with badge */}
                         <div className="relative">
                             <img src={cardimg} alt="card" className="w-full h-[140px] sm:h-[160px] object-cover" />
-                            <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-[12px] sm:text-[13px] px-3 py-[2px] font-bold rounded">
-                                Best Value
-                            </span>
+                            {index === 0 && ( // Only show badge on first card (or whichever you prefer)
+                                <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-[12px] sm:text-[13px] px-3 py-[2px] font-bold rounded">
+                                    Best Value
+                                </span>
+                            )}
                         </div>
 
                         {/* Plan Details */}
@@ -59,7 +74,10 @@ const HeroCard = () => {
 
                             <div>
                                 <p className="text-sm text-gray-500 mb-2">Valid until canceled</p>
-                                <button className="bg-blue-600 text-white px-4 py-2 sm:px-6 sm:py-2 rounded w-full">
+                                <button
+                                    onClick={() => handleSelectPlan(plan)}
+                                    className="bg-blue-600 text-white px-4 py-2 sm:px-6 sm:py-2 rounded w-full cursor-pointer"
+                                >
                                     Select
                                 </button>
 
