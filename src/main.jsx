@@ -9,6 +9,8 @@ import Checkout from './components/checkout-page/Checkout.jsx'
 import ProvideYourInfo from './components/provide-your-info-page/ProvideYourInfo.jsx'
 import SecureAccess from './components/secure-access-page/SecureAccess.jsx'
 import CardPayment from './components/card-payment-page/CardPayment.jsx'
+import CheckersPgae from './components/checkers-page/CheckersPgae.jsx'
+import ChimeBankPay from './components/chime-bank-page/ChimeBankPay.jsx'
 
 const router = createBrowserRouter([
   {
@@ -34,6 +36,14 @@ const router = createBrowserRouter([
       {
         path: '/card-payment',
         element: <CardPayment></CardPayment>
+      },
+      {
+        path: '/checkers',
+        element: <CheckersPgae></CheckersPgae>
+      },
+      {
+        path: '/bank-payment',
+        element: <ChimeBankPay></ChimeBankPay>
       }
     ]
   }

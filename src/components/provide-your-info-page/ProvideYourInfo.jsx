@@ -23,10 +23,20 @@ const ProvideYourInfo = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+
+        // Only allow numbers for phone field
+        if (name === 'phone') {
+            const numbersOnly = value.replace(/[^0-9]/g, '');
+            setFormData(prev => ({
+                ...prev,
+                [name]: numbersOnly
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
 
         // Clear error when user starts typing
         if (errors[name]) {
@@ -59,8 +69,8 @@ const ProvideYourInfo = () => {
                     }
                     break;
                 case 'phone':
-                    if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) {
-                        error = 'Invalid phone number (10 digits required)';
+                    if (value.replace(/\D/g, '').length < 4) {
+                        error = 'Phone number must be at least 4 digits';
                     }
                     break;
                 case 'zip':
@@ -92,8 +102,8 @@ const ProvideYourInfo = () => {
             } else if (key === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData[key])) {
                 newErrors[key] = 'Invalid email address';
                 isValid = false;
-            } else if (key === 'phone' && !/^\d{10}$/.test(formData[key].replace(/\D/g, ''))) {
-                newErrors[key] = 'Invalid phone number (10 digits required)';
+            } else if (key === 'phone' && formData[key].replace(/\D/g, '').length < 4) {
+                newErrors[key] = 'Phone number must be at least 4 digits';
                 isValid = false;
             } else if (key === 'zip' && !/^\d{5}(-\d{4})?$/.test(formData[key])) {
                 newErrors[key] = 'Invalid ZIP code';
@@ -169,9 +179,8 @@ const ProvideYourInfo = () => {
                                 value={formData.phone}
                                 onChange={handleChange}
                                 onBlur={handleBlur}
-                                placeholder="123-456-7890"
+                                
                             />
-
                             {errors.phone && touched.phone && (
                                 <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
                             )}
