@@ -16,10 +16,10 @@ const Checkout = () => {
 
     return (
         <div className="max-w-6xl mx-auto p-6 min-h-screen">
-            <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+            <h1 className="text-3xl font-bold mb-2 md:mb-8">Checkout</h1>
             <div className='mb-10'><hr /></div>
 
-            <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex flex-col lg:flex-row gap-1 md:gap-8">
                 {/* Left Side - Payment Button */}
                 <div className="lg:w-2/3 ">
                     <div className="bg-white shadow-md rounded-lg p-6 mb-6">
@@ -31,7 +31,7 @@ const Checkout = () => {
                                 <p className="text-gray-600 mb-2">Payment method will go here</p>
                             </div>
 
-                            <Link to={'/provide-your-info'} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-lg w-full font-medium text-lg flex items-center justify-center gap-2">
+                            <Link to={'/provide-your-info'} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 md:py-4 rounded-lg w-full font-medium text-lg flex items-center justify-center gap-2">
                                 <FaLock className="text-white" />
                                 Pay ${selectedPlan.price}{selectedPlan.setup && ' + $3'}
                             </Link>

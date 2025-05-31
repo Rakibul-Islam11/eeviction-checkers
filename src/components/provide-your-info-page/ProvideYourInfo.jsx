@@ -5,7 +5,7 @@ import { FaCheck } from 'react-icons/fa';
 
 const ProvideYourInfo = () => {
     return (
-        <div className="flex flex-col lg:flex-row max-w-6xl mx-auto shadow-lg rounded-lg overflow-hidden mt-3 md:mt-10 font-sans bg-white">
+        <div className="flex flex-col lg:flex-row max-w-6xl mx-auto shadow-lg rounded-lg overflow-hidden mt-3 md:mt-10 font-sans bg-white mb-6">
             {/* Left Section - Form */}
             <div className="w-full lg:w-[60%] p-6 md:p-8">
                 <div className="mb-6">
