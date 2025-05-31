@@ -6,6 +6,7 @@ import App from './App.jsx'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Home from './components/home-page/Home.jsx'
 import Checkout from './components/checkout-page/Checkout.jsx'
+import ProvideYourInfo from './components/provide-your-info-page/ProvideYourInfo.jsx'
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
       {
         path: '/checkout',
         element: <Checkout />
+      },
+      {
+        path: '/provide-your-info',
+        element: <ProvideYourInfo></ProvideYourInfo>
       }
     ]
   }

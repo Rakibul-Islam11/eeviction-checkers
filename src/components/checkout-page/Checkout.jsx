@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FaLock, FaShieldAlt } from 'react-icons/fa';
 
 const Checkout = () => {
@@ -31,10 +31,10 @@ const Checkout = () => {
                                 <p className="text-gray-600 mb-2">Payment method will go here</p>
                             </div>
 
-                            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-lg w-full font-medium text-lg flex items-center justify-center gap-2">
+                            <Link to={'/provide-your-info'} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-lg w-full font-medium text-lg flex items-center justify-center gap-2">
                                 <FaLock className="text-white" />
                                 Pay ${selectedPlan.price}{selectedPlan.setup && ' + $3'}
-                            </button>
+                            </Link>
 
                             <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
                                 <FaShieldAlt className="text-green-500" />
