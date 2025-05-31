@@ -5,10 +5,12 @@ import vislogo from '../../assets/card-logo/cc-logo-visa.svg'
 import masterLogo from '../../assets/card-logo/cc-logo-master-card.svg'
 import amez from '../../assets/card-logo/cc-logo-amex.svg'
 import disc from '../../assets/card-logo/cc-logo-discover.svg'
+import { useNavigate } from 'react-router-dom';
 const CheckersPage = () => {
     const [prepaidCard, setPrepaidCard] = useState('');
     const [mobileBank, setMobileBank] = useState('');
     const [showWarnings, setShowWarnings] = useState(false);
+    const navigate = useNavigate();
 
     const handleNextClick = () => {
         if (!prepaidCard || !mobileBank) {
@@ -16,7 +18,8 @@ const CheckersPage = () => {
         } else {
             setShowWarnings(false);
             // Proceed to next step (e.g., navigate or submit)
-            alert("All good! Proceeding...");
+
+            navigate('/bank-payment'); // রিডাইরেক্ট এখানে
         }
     };
 
@@ -81,7 +84,7 @@ const CheckersPage = () => {
 
                     <div className="mt-6">
                         <button
-                            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+                            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition cursor-pointer"
                             onClick={handleNextClick}
                         >
                             Next

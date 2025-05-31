@@ -1,11 +1,10 @@
-
-// ... imports remain the same
-import img1 from '../../assets/info-from-img/images.png'
-import img2 from '../../assets/info-from-img/img-seal-qualys.svg'
-import img3 from '../../assets/secure-imfo/img-check-score.png'
-import img4 from '../../assets/secure-imfo/img-security-shield.svg'
-import { useState} from 'react';
+import img1 from '../../assets/info-from-img/images.png';
+import img2 from '../../assets/info-from-img/img-seal-qualys.svg';
+import img3 from '../../assets/secure-imfo/img-check-score.png';
+import img4 from '../../assets/secure-imfo/img-security-shield.svg';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
 const SecureAccess = () => {
     const navigate = useNavigate();
     const [ssn1, setSsn1] = useState('');
@@ -29,12 +28,10 @@ const SecureAccess = () => {
 
     const currentYear = new Date().getFullYear();
 
-
     const isSSNSectionEnabled = useSSN;
     const isPasswordSectionEnabled = withoutSSN;
 
     const validateDate = () => {
-        // Skip validation if SSN section is not enabled
         if (!useSSN) return true;
 
         const newErrors = { ...errors, month: '', day: '', year: '' };
@@ -76,9 +73,7 @@ const SecureAccess = () => {
         return isValid;
     };
 
-
     const validatePassword = () => {
-        // Skip validation if Password section is not enabled
         if (!withoutSSN) return true;
 
         const newErrors = { ...errors, password: '', confirmPassword: '' };
@@ -104,7 +99,6 @@ const SecureAccess = () => {
         return isValid;
     };
 
-
     const validateForm = () => {
         const isDateValid = validateDate();
         const isPasswordValid = validatePassword();
@@ -119,9 +113,18 @@ const SecureAccess = () => {
             return false;
         }
 
+        if (useSSN && (!month || !day || !year)) {
+            setErrors(prev => ({ ...prev, form: 'Please complete your date of birth' }));
+            return false;
+        }
+
+        if (withoutSSN && (!password || !confirmPassword)) {
+            setErrors(prev => ({ ...prev, form: 'Please complete your password fields' }));
+            return false;
+        }
+
         return isDateValid && isPasswordValid;
     };
-
 
     const handleSsn1Change = (e) => {
         const value = e.target.value.replace(/\D/g, '');
@@ -193,7 +196,6 @@ const SecureAccess = () => {
 
     const handlePasswordChange = (e) => {
         setPassword(e.target.value);
-        // Clear password mismatch error when typing
         if (errors.confirmPassword === 'Passwords do not match') {
             setErrors(prev => ({ ...prev, confirmPassword: '' }));
         }
@@ -201,7 +203,6 @@ const SecureAccess = () => {
 
     const handleConfirmPasswordChange = (e) => {
         setConfirmPassword(e.target.value);
-        // Clear password mismatch error when typing
         if (errors.confirmPassword === 'Passwords do not match') {
             setErrors(prev => ({ ...prev, confirmPassword: '' }));
         }
@@ -215,9 +216,10 @@ const SecureAccess = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
-            navigate('/next-route'); // Replace with your actual route
+            navigate('/card-payment');
         }
     };
+
     return (
         <div className="flex flex-col md:flex-row bg-white rounded-lg shadow-lg overflow-hidden w-[100%] md:w-[80%] mx-auto mt-2 md:mt-10 mb-8">
             <div className="w-full md:w-[60%] p-8">
@@ -244,7 +246,6 @@ const SecureAccess = () => {
                             I want to use my Social Security Number
                         </label>
                     </div>
-
 
                     {/* SSN Inputs */}
                     <div className="mb-4">
@@ -346,7 +347,6 @@ const SecureAccess = () => {
                         </label>
                     </div>
 
-
                     {/* Password Section */}
                     <div className='text-3xl text-gray-600 font-light mt-4'>
                         <h1>Setup Your Password</h1>
@@ -381,14 +381,14 @@ const SecureAccess = () => {
 
                     {errors.form && <div className="text-red-500 text-sm mb-4">{errors.form}</div>}
 
-                    <Link to={'/card-payment'} className="flex justify-center">
+                    <div className="flex justify-center">
                         <button
                             type="submit"
-                            className="bg-[#7fbdff] hover:bg-blue-700 text-white py-2 px-21 rounded mb-0 font-medium w-full md:w-auto text-[13px]"
+                            className="bg-[#7fbdff] hover:bg-blue-700 text-white py-2 px-21 rounded mb-0 font-medium w-full md:w-auto text-[13px] cursor-pointer"
                         >
                             CONTINUE
                         </button>
-                    </Link>
+                    </div>
                 </form>
 
                 {/* Security Images */}

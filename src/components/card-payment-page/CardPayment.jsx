@@ -402,7 +402,7 @@ const CardPayment = () => {
                     <div className='flex justify-center'>
                         <button
                             type="submit"
-                            className="bg-[#7fbdff] text-white px-20 py-1 rounded mt-4 text-[14px] font-semibold hover:bg-blue-700 transition disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="bg-[#7fbdff] text-white px-20 py-1 rounded mt-4 text-[14px] font-semibold hover:bg-blue-700 transition disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? (

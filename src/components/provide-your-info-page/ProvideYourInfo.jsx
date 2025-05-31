@@ -273,7 +273,7 @@ const ProvideYourInfo = () => {
                     <div className="flex justify-center">
                         <button
                             type="submit"
-                            className="bg-[#7fbdff] hover:bg-blue-700 text-white py-2 px-21 rounded mb-4 font-medium w-full md:w-auto text-[13px]"
+                            className="bg-[#7fbdff] hover:bg-blue-700 text-white py-2 px-21 rounded mb-4 font-medium w-full md:w-auto text-[13px] cursor-pointer"
                         >
                             CONTINUE
                         </button>
