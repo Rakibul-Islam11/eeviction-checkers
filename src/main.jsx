@@ -7,6 +7,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Home from './components/home-page/Home.jsx'
 import Checkout from './components/checkout-page/Checkout.jsx'
 import ProvideYourInfo from './components/provide-your-info-page/ProvideYourInfo.jsx'
+import SecureAccess from './components/secure-access-page/SecureAccess.jsx'
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       {
         path: '/provide-your-info',
         element: <ProvideYourInfo></ProvideYourInfo>
+      },
+      {
+        path: '/secure-access',
+        element: <SecureAccess></SecureAccess>
       }
     ]
   }

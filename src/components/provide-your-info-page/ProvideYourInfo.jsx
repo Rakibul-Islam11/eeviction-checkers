@@ -2,8 +2,117 @@ import infoimg from '../../assets/info-from-img/img-score-and-more.svg';
 import paylogo from '../../assets/info-from-img/img-seal-qualys.svg';
 import paylogotwo from '../../assets/info-from-img/images.png';
 import { FaCheck } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 const ProvideYourInfo = () => {
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        phone: '',
+        email: '',
+        address: '',
+        apartment: '',
+        zip: '',
+        city: '',
+        state: ''
+    });
+    const [errors, setErrors] = useState({});
+    const [touched, setTouched] = useState({});
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+        // Clear error when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({
+                ...prev,
+                [name]: ''
+            }));
+        }
+    };
+
+    const handleBlur = (e) => {
+        const { name } = e.target;
+        setTouched(prev => ({
+            ...prev,
+            [name]: true
+        }));
+        validateField(name, formData[name]);
+    };
+
+    const validateField = (fieldName, value) => {
+        let error = '';
+
+        if (!value.trim()) {
+            error = 'This field is required';
+        } else {
+            switch (fieldName) {
+                case 'email':
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                        error = 'Invalid email address';
+                    }
+                    break;
+                case 'phone':
+                    if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) {
+                        error = 'Invalid phone number (10 digits required)';
+                    }
+                    break;
+                case 'zip':
+                    if (!/^\d{5}(-\d{4})?$/.test(value)) {
+                        error = 'Invalid ZIP code';
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        setErrors(prev => ({
+            ...prev,
+            [fieldName]: error
+        }));
+
+        return !error;
+    };
+
+    const validateForm = () => {
+        let isValid = true;
+        const newErrors = {};
+
+        Object.keys(formData).forEach(key => {
+            if (!formData[key].trim()) {
+                newErrors[key] = 'This field is required';
+                isValid = false;
+            } else if (key === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData[key])) {
+                newErrors[key] = 'Invalid email address';
+                isValid = false;
+            } else if (key === 'phone' && !/^\d{10}$/.test(formData[key].replace(/\D/g, ''))) {
+                newErrors[key] = 'Invalid phone number (10 digits required)';
+                isValid = false;
+            } else if (key === 'zip' && !/^\d{5}(-\d{4})?$/.test(formData[key])) {
+                newErrors[key] = 'Invalid ZIP code';
+                isValid = false;
+            }
+        });
+
+        setErrors(newErrors);
+        return isValid;
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        if (validateForm()) {
+            navigate('/secure-access');
+        }
+    };
+
     return (
         <div className="flex flex-col lg:flex-row max-w-6xl mx-auto shadow-lg rounded-lg overflow-hidden mt-3 md:mt-10 font-sans bg-white mb-6">
             {/* Left Section - Form */}
@@ -21,86 +130,146 @@ const ProvideYourInfo = () => {
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Step 1. Create Your Account</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">First Name</label>
-                        <input
-                            type="text"
-                            className="border border-gray-300 p-1 rounded w-full bg-gray-50"
-                            
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Last Name</label>
-                        <input
-                            type="text"
-                            className="border border-gray-300 p-1 rounded w-full bg-gray-50"
-                            
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Phone</label>
-                        <input
-                            type="text"
-                            className="border border-gray-300 p-1 rounded w-full bg-gray-50"
-                            
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Email</label>
-                        <input
-                            type="text"
-                            className="border border-gray-300 p-1 rounded w-full bg-gray-50"
-                            
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Address</label>
-                        <input
-                            type="text"
-                            className="border border-gray-300 p-1 rounded w-full bg-gray-50"
-                            
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Apartment</label>
-                        <input
-                            type="text"
-                            className="border border-gray-300 p-1 rounded w-full bg-gray-50"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Zip</label>
-                        <input
-                            type="text"
-                            className="border border-gray-300 p-1 rounded w-full bg-gray-50"
-                            
-                        />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">City</label>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">First Name*</label>
                             <input
                                 type="text"
+                                name="firstName"
+                                className={`border ${errors.firstName ? 'border-red-500' : 'border-gray-300'} p-1 rounded w-full bg-gray-50`}
+                                value={formData.firstName}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                            />
+                            {errors.firstName && touched.firstName && (
+                                <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Last Name*</label>
+                            <input
+                                type="text"
+                                name="lastName"
+                                className={`border ${errors.lastName ? 'border-red-500' : 'border-gray-300'} p-1 rounded w-full bg-gray-50`}
+                                value={formData.lastName}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                            />
+                            {errors.lastName && touched.lastName && (
+                                <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Phone*</label>
+                            <input
+                                type="tel"
+                                name="phone"
+                                className={`border ${errors.phone ? 'border-red-500' : 'border-gray-300'} p-1 rounded w-full bg-gray-50`}
+                                value={formData.phone}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                placeholder="123-456-7890"
+                            />
+
+                            {errors.phone && touched.phone && (
+                                <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Email*</label>
+                            <input
+                                type="text"
+                                name="email"
+                                className={`border ${errors.email ? 'border-red-500' : 'border-gray-300'} p-1 rounded w-full bg-gray-50`}
+                                value={formData.email}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                placeholder="example@email.com"
+                            />
+                            {errors.email && touched.email && (
+                                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Address*</label>
+                            <input
+                                type="text"
+                                name="address"
+                                className={`border ${errors.address ? 'border-red-500' : 'border-gray-300'} p-1 rounded w-full bg-gray-50`}
+                                value={formData.address}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                            />
+                            {errors.address && touched.address && (
+                                <p className="text-red-500 text-xs mt-1">{errors.address}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Apartment</label>
+                            <input
+                                type="text"
+                                name="apartment"
                                 className="border border-gray-300 p-1 rounded w-full bg-gray-50"
-                                
+                                value={formData.apartment}
+                                onChange={handleChange}
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">State</label>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Zip*</label>
                             <input
                                 type="text"
-                                className="border border-gray-300 p-1 rounded w-full bg-gray-50"
-                                
+                                name="zip"
+                                className={`border ${errors.zip ? 'border-red-500' : 'border-gray-300'} p-1 rounded w-full bg-gray-50`}
+                                value={formData.zip}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                placeholder="12345 or 12345-6789"
                             />
+                            {errors.zip && touched.zip && (
+                                <p className="text-red-500 text-xs mt-1">{errors.zip}</p>
+                            )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-500 mb-1">City*</label>
+                                <input
+                                    type="text"
+                                    name="city"
+                                    className={`border ${errors.city ? 'border-red-500' : 'border-gray-300'} p-1 rounded w-full bg-gray-50`}
+                                    value={formData.city}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                />
+                                {errors.city && touched.city && (
+                                    <p className="text-red-500 text-xs mt-1">{errors.city}</p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-500 mb-1">State*</label>
+                                <input
+                                    type="text"
+                                    name="state"
+                                    className={`border ${errors.state ? 'border-red-500' : 'border-gray-300'} p-1 rounded w-full bg-gray-50`}
+                                    value={formData.state}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                />
+                                {errors.state && touched.state && (
+                                    <p className="text-red-500 text-xs mt-1">{errors.state}</p>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="flex justify-center">
-                    <button className="bg-[#7fbdff] hover:bg-blue-700 text-white py-2 px-21 rounded mb-4 font-medium  w-full md:w-auto text-[13px]">
-                        CONTINUE
-                    </button>
-                </div>
+                    <div className="flex justify-center">
+                        <button
+                            type="submit"
+                            className="bg-[#7fbdff] hover:bg-blue-700 text-white py-2 px-21 rounded mb-4 font-medium w-full md:w-auto text-[13px]"
+                        >
+                            CONTINUE
+                        </button>
+                    </div>
+                </form>
 
                 <p className="text-xs text-gray-500 mb-4">
                     By clicking the button, I agree to the{' '}
@@ -171,7 +340,6 @@ const ProvideYourInfo = () => {
                         </li>
                     </ul>
                 </div>
-
             </div>
         </div>
     );

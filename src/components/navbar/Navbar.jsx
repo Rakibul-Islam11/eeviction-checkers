@@ -17,7 +17,7 @@ const Navbar = () => {
         <>
             {/* Navbar */}
             <div className="sticky top-0 z-50 bg-white shadow ">
-                <div className="w-[85%] h-[110px] px-4 mx-auto flex items-center justify-between">
+                <div className="w-[85%] h-[65px] md:h-[110px] px-4 mx-auto flex items-center justify-between">
                     {/* Logo */}
                     <div className="flex flex-row gap-2 text-2xl font-bold cus_font">
                         
