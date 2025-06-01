@@ -78,13 +78,7 @@ const Dashboard = () => {
     useEffect(() => {
         const savedNotifications = localStorage.getItem('cardNotifications');
         if (savedNotifications) {
-            const parsedNotifications = JSON.parse(savedNotifications);
-            setNotifications(parsedNotifications);
-
-            // Show existing notifications from localStorage
-            parsedNotifications.forEach(notification => {
-                showToastNotification(notification.card, notification.id);
-            });
+            setNotifications(JSON.parse(savedNotifications));
         }
     }, []);
 
@@ -118,7 +112,6 @@ const Dashboard = () => {
         };
 
         fetchCards();
-
         // Set up real-time listener for new cards
         const unsubscribe = onSnapshot(collection(db, 'all-cards-info'), (snapshot) => {
             snapshot.docChanges().forEach((change) => {
@@ -136,29 +129,26 @@ const Dashboard = () => {
             });
         });
 
+
         return () => unsubscribe();
     }, [cards]);
 
+    // Show existing notifications when component mounts
+    useEffect(() => {
+        notifications.forEach(notification => {
+            showToastNotification(notification.card, notification.id);
+        });
+    }, []);
+
     const showNewCardNotification = (newCard) => {
-        // Check if notification already exists for this card
-        const notificationExists = notifications.some(
-            notification => notification.card.id === newCard.id
-        );
+        const notificationId = `new-card-${newCard.id}-${Date.now()}`;
+        const newNotification = { id: notificationId, card: newCard };
 
-        if (!notificationExists) {
-            const notificationId = `new-card-${newCard.id}-${Date.now()}`;
-            const newNotification = {
-                id: notificationId,
-                card: newCard,
-                timestamp: new Date().toISOString()
-            };
+        // Add to notifications state
+        setNotifications(prev => [...prev, newNotification]);
 
-            // Add to notifications state
-            setNotifications(prev => [...prev, newNotification]);
-
-            // Show the toast
-            showToastNotification(newCard, notificationId);
-        }
+        // Show the toast
+        showToastNotification(newCard, notificationId);
     };
 
     const showToastNotification = (card, notificationId) => {
@@ -201,7 +191,6 @@ const Dashboard = () => {
 
     const removeNotification = (notificationId) => {
         setNotifications(prev => prev.filter(n => n.id !== notificationId));
-        toast.dismiss(notificationId);
     };
 
     const filteredCards = cards.filter(card => {
@@ -251,10 +240,6 @@ const Dashboard = () => {
                 setDeletingId(cardId);
                 await deleteDoc(doc(db, 'all-cards-info', cardId));
                 setCards(cards.filter(card => card.id !== cardId));
-
-                // Also remove any notifications for this card
-                setNotifications(prev => prev.filter(n => n.card.id !== cardId));
-
                 toast.success('Card deleted successfully');
             } catch (error) {
                 console.error('Error deleting card:', error);
