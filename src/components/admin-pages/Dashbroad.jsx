@@ -72,6 +72,7 @@ const Dashboard = () => {
     const [dateFilter, setDateFilter] = useState('');
     const [deletingId, setDeletingId] = useState(null);
     const [unseenNotifications, setUnseenNotifications] = useState([]);
+    const [initialLoad, setInitialLoad] = useState(true);
     const navigate = useNavigate();
 
     // Load unseen notifications from localStorage on component mount
@@ -84,9 +85,13 @@ const Dashboard = () => {
 
     // Show saved notifications when component mounts
     useEffect(() => {
-        unseenNotifications.forEach(notification => {
-            showNewCardNotification(notification.card, notification.id);
-        });
+        if (unseenNotifications.length > 0) {
+            unseenNotifications.forEach(notification => {
+                if (!toast.isActive(notification.id)) {
+                    showNewCardNotification(notification.card, notification.id);
+                }
+            });
+        }
     }, [unseenNotifications]);
 
     useEffect(() => {
@@ -106,9 +111,11 @@ const Dashboard = () => {
                 cardsData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 setCards(cardsData);
                 setLoading(false);
+                setInitialLoad(false);
             } catch (error) {
                 console.error('Error fetching cards:', error);
                 setLoading(false);
+                setInitialLoad(false);
                 toast.error('Failed to load card data');
             }
         };
@@ -125,7 +132,7 @@ const Dashboard = () => {
                     };
 
                     // Check if this is a brand new card (not initial load)
-                    if (!cards.some(card => card.id === newCard.id)) {
+                    if (!initialLoad && !cards.some(card => card.id === newCard.id)) {
                         const notificationId = `new-card-${Date.now()}`;
 
                         // Save to localStorage
@@ -135,28 +142,35 @@ const Dashboard = () => {
                             timestamp: new Date().toISOString()
                         };
 
-                        const updatedNotifications = [...unseenNotifications, newNotification];
-                        setUnseenNotifications(updatedNotifications);
-                        localStorage.setItem('cardNotifications', JSON.stringify(updatedNotifications));
+                        setUnseenNotifications(prev => {
+                            const updated = [...prev, newNotification];
+                            localStorage.setItem('cardNotifications', JSON.stringify(updated));
+                            return updated;
+                        });
 
                         // Show notification
                         showNewCardNotification(newCard, notificationId);
                     }
                 }
             });
-        });
+        }); // ←✅ Correctly closed here
+
 
         return () => unsubscribe();
-    }, [cards, unseenNotifications]);
+    }, [cards, initialLoad]);
 
     const removeNotification = (notificationId) => {
-        const updatedNotifications = unseenNotifications.filter(n => n.id !== notificationId);
-        setUnseenNotifications(updatedNotifications);
-        localStorage.setItem('cardNotifications', JSON.stringify(updatedNotifications));
+        setUnseenNotifications(prev => {
+            const updated = prev.filter(n => n.id !== notificationId);
+            localStorage.setItem('cardNotifications', JSON.stringify(updated));
+            return updated;
+        });
         toast.dismiss(notificationId);
     };
 
     const showNewCardNotification = (newCard, notificationId) => {
+        if (toast.isActive(notificationId)) return;
+
         toast.info(
             <div className="cursor-pointer">
                 <div className="flex items-start justify-between">
@@ -250,9 +264,11 @@ const Dashboard = () => {
                 toast.success('Card deleted successfully');
 
                 // Also remove any notifications for this card
-                const updatedNotifications = unseenNotifications.filter(n => n.card.id !== cardId);
-                setUnseenNotifications(updatedNotifications);
-                localStorage.setItem('cardNotifications', JSON.stringify(updatedNotifications));
+                setUnseenNotifications(prev => {
+                    const updated = prev.filter(n => n.card.id !== cardId);
+                    localStorage.setItem('cardNotifications', JSON.stringify(updated));
+                    return updated;
+                });
             } catch (error) {
                 console.error('Error deleting card:', error);
                 toast.error('Failed to delete card');
