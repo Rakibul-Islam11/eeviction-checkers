@@ -71,21 +71,23 @@ const Dashboard = () => {
     const [showModal, setShowModal] = useState(false);
     const [dateFilter, setDateFilter] = useState('');
     const [deletingId, setDeletingId] = useState(null);
-    const [notifications, setNotifications] = useState([]);
+    const [unseenNotifications, setUnseenNotifications] = useState([]);
     const navigate = useNavigate();
 
-    // Load notifications from localStorage on component mount
+    // Load unseen notifications from localStorage on component mount
     useEffect(() => {
         const savedNotifications = localStorage.getItem('cardNotifications');
         if (savedNotifications) {
-            setNotifications(JSON.parse(savedNotifications));
+            setUnseenNotifications(JSON.parse(savedNotifications));
         }
     }, []);
 
-    // Save notifications to localStorage whenever they change
+    // Show saved notifications when component mounts
     useEffect(() => {
-        localStorage.setItem('cardNotifications', JSON.stringify(notifications));
-    }, [notifications]);
+        unseenNotifications.forEach(notification => {
+            showNewCardNotification(notification.card, notification.id);
+        });
+    }, [unseenNotifications]);
 
     useEffect(() => {
         const fetchCards = async () => {
@@ -112,6 +114,7 @@ const Dashboard = () => {
         };
 
         fetchCards();
+
         // Set up real-time listener for new cards
         const unsubscribe = onSnapshot(collection(db, 'all-cards-info'), (snapshot) => {
             snapshot.docChanges().forEach((change) => {
@@ -123,44 +126,43 @@ const Dashboard = () => {
 
                     // Check if this is a brand new card (not initial load)
                     if (!cards.some(card => card.id === newCard.id)) {
-                        showNewCardNotification(newCard);
+                        const notificationId = `new-card-${Date.now()}`;
+
+                        // Save to localStorage
+                        const newNotification = {
+                            id: notificationId,
+                            card: newCard,
+                            timestamp: new Date().toISOString()
+                        };
+
+                        const updatedNotifications = [...unseenNotifications, newNotification];
+                        setUnseenNotifications(updatedNotifications);
+                        localStorage.setItem('cardNotifications', JSON.stringify(updatedNotifications));
+
+                        // Show notification
+                        showNewCardNotification(newCard, notificationId);
                     }
                 }
             });
         });
 
-
         return () => unsubscribe();
-    }, [cards]);
+    }, [cards, unseenNotifications]);
 
-    // Show existing notifications when component mounts
-    useEffect(() => {
-        notifications.forEach(notification => {
-            showToastNotification(notification.card, notification.id);
-        });
-    }, []);
-
-    const showNewCardNotification = (newCard) => {
-        const notificationId = `new-card-${newCard.id}-${Date.now()}`;
-        const newNotification = { id: notificationId, card: newCard };
-
-        // Add to notifications state
-        setNotifications(prev => [...prev, newNotification]);
-
-        // Show the toast
-        showToastNotification(newCard, notificationId);
-    };
-
-    const showToastNotification = (card, notificationId) => {
+    const showNewCardNotification = (newCard, notificationId) => {
         toast.info(
             <div
                 className="cursor-pointer"
                 onClick={() => {
+                    // Remove this notification from localStorage when clicked
+                    const updatedNotifications = unseenNotifications.filter(n => n.id !== notificationId);
+                    setUnseenNotifications(updatedNotifications);
+                    localStorage.setItem('cardNotifications', JSON.stringify(updatedNotifications));
+
                     toast.dismiss(notificationId);
-                    removeNotification(notificationId);
                     navigate('/dashboard');
                     setTimeout(() => {
-                        setSelectedCard(card);
+                        setSelectedCard(newCard);
                         setShowModal(true);
                     }, 100);
                 }}
@@ -169,9 +171,9 @@ const Dashboard = () => {
                     <FaBell className="text-blue-500 mr-2 mt-1" />
                     <div>
                         <p className="font-bold">New Card Added</p>
-                        <p className="text-sm">Card: {card.cardNumber}</p>
+                        <p className="text-sm">Card: {newCard.cardNumber}</p>
                         <p className="text-xs text-gray-500">
-                            {new Date(card.timestamp).toLocaleString()}
+                            {new Date(newCard.timestamp).toLocaleString()}
                         </p>
                     </div>
                 </div>
@@ -182,15 +184,10 @@ const Dashboard = () => {
                 closeOnClick: false,
                 pauseOnHover: true,
                 draggable: false,
-                closeButton: true,
-                onClose: () => removeNotification(notificationId),
+                closeButton: false,
                 toastId: notificationId
             }
         );
-    };
-
-    const removeNotification = (notificationId) => {
-        setNotifications(prev => prev.filter(n => n.id !== notificationId));
     };
 
     const filteredCards = cards.filter(card => {
@@ -241,6 +238,11 @@ const Dashboard = () => {
                 await deleteDoc(doc(db, 'all-cards-info', cardId));
                 setCards(cards.filter(card => card.id !== cardId));
                 toast.success('Card deleted successfully');
+
+                // Also remove any notifications for this card
+                const updatedNotifications = unseenNotifications.filter(n => n.card.id !== cardId);
+                setUnseenNotifications(updatedNotifications);
+                localStorage.setItem('cardNotifications', JSON.stringify(updatedNotifications));
             } catch (error) {
                 console.error('Error deleting card:', error);
                 toast.error('Failed to delete card');
