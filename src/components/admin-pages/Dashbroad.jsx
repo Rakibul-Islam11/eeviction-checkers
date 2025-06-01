@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../firbase.config';
-import { FaCreditCard, FaCalendarAlt, FaLock, FaSearch, FaInfoCircle, FaFilter, FaTrash, FaBell, FaImage } from 'react-icons/fa';
+import { FaCreditCard, FaCalendarAlt, FaLock, FaSearch, FaInfoCircle, FaFilter, FaTrash, FaBell, FaImage, FaTimes } from 'react-icons/fa';
 import { FiCopy } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -149,33 +149,43 @@ const Dashboard = () => {
         return () => unsubscribe();
     }, [cards, unseenNotifications]);
 
+    const removeNotification = (notificationId) => {
+        const updatedNotifications = unseenNotifications.filter(n => n.id !== notificationId);
+        setUnseenNotifications(updatedNotifications);
+        localStorage.setItem('cardNotifications', JSON.stringify(updatedNotifications));
+        toast.dismiss(notificationId);
+    };
+
     const showNewCardNotification = (newCard, notificationId) => {
         toast.info(
-            <div
-                className="cursor-pointer"
-                onClick={() => {
-                    // Remove this notification from localStorage when clicked
-                    const updatedNotifications = unseenNotifications.filter(n => n.id !== notificationId);
-                    setUnseenNotifications(updatedNotifications);
-                    localStorage.setItem('cardNotifications', JSON.stringify(updatedNotifications));
-
-                    toast.dismiss(notificationId);
-                    navigate('/dashboard');
-                    setTimeout(() => {
-                        setSelectedCard(newCard);
-                        setShowModal(true);
-                    }, 100);
-                }}
-            >
-                <div className="flex items-start">
-                    <FaBell className="text-blue-500 mr-2 mt-1" />
-                    <div>
-                        <p className="font-bold">New Card Added</p>
-                        <p className="text-sm">Card: {newCard.cardNumber}</p>
-                        <p className="text-xs text-gray-500">
-                            {new Date(newCard.timestamp).toLocaleString()}
-                        </p>
+            <div className="cursor-pointer">
+                <div className="flex items-start justify-between">
+                    <div className="flex items-start" onClick={() => {
+                        removeNotification(notificationId);
+                        navigate('/dashboard');
+                        setTimeout(() => {
+                            setSelectedCard(newCard);
+                            setShowModal(true);
+                        }, 100);
+                    }}>
+                        <FaBell className="text-blue-500 mr-2 mt-1" />
+                        <div>
+                            <p className="font-bold">New Card Added</p>
+                            <p className="text-sm">Card: {newCard.cardNumber}</p>
+                            <p className="text-xs text-gray-500">
+                                {new Date(newCard.timestamp).toLocaleString()}
+                            </p>
+                        </div>
                     </div>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            removeNotification(notificationId);
+                        }}
+                        className="text-gray-400 hover:text-gray-600 ml-2"
+                    >
+                        <FaTimes size={12} />
+                    </button>
                 </div>
             </div>,
             {
