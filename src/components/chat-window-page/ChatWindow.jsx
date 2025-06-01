@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { ref, push, onChildAdded, off } from 'firebase/database';
 import { rtdb } from '../../../firbase.config';
+import { FaTimes, FaPaperPlane, FaArrowDown } from 'react-icons/fa';
 
-const ChatWindow = ({ cardNumber }) => {
+const ChatWindow = ({ cardNumber, onClose }) => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const containerRef = useRef(null);
@@ -10,6 +11,8 @@ const ChatWindow = ({ cardNumber }) => {
     const [isAtBottom, setIsAtBottom] = useState(true);
 
     useEffect(() => {
+        if (!cardNumber) return;
+
         const messagesRef = ref(rtdb, `chats/${cardNumber}`);
 
         const handleNewMessage = (snapshot) => {
@@ -75,19 +78,29 @@ const ChatWindow = ({ cardNumber }) => {
     };
 
     return (
-        <div className="fixed bottom-4 right-4  bg-white h-[500px] w-[400px] border border-gray-300 rounded-lg shadow-lg flex flex-col">
-            <h3 className="text-lg font-semibold p-4 text-center text-blue-600 border-b border-gray-200">
-                Chat with Support Team
-            </h3>
+        <div className="relative bg-white rounded-t-lg md:rounded-lg shadow-xl flex flex-col w-full md:w-[400px] h-[70vh] md:h-[500px] border border-gray-200">
+            {/* Header */}
+            <div className="flex justify-between items-center p-4 bg-blue-600 text-white rounded-t-lg">
+                <h3 className="text-lg font-semibold">
+                    Chat with Support Team
+                </h3>
+                <button
+                    onClick={onClose}
+                    className="p-1 rounded-full hover:bg-blue-700 transition-colors"
+                >
+                    <FaTimes />
+                </button>
+            </div>
 
+            {/* Messages Container */}
             <div
                 ref={containerRef}
-                className="flex-1 overflow-y-auto p-4 space-y-2"
-                style={{ height: '300px' }}
+                className="flex-1 overflow-y-auto p-4 space-y-3"
             >
                 {messages.length === 0 ? (
-                    <div className="text-center text-gray-500 py-4">
-                        No messages yet. Start the conversation!
+                    <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                        <p>No messages yet.</p>
+                        <p>Start the conversation!</p>
                     </div>
                 ) : (
                     messages.map((msg, idx) => (
@@ -100,35 +113,37 @@ const ChatWindow = ({ cardNumber }) => {
                                     {msg.sender === 'visitor' ? 'You' : 'Admin'} • {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                             </div>
-                            <span
-                                className={`px-3 py-2 rounded-lg max-w-xs ${msg.sender === 'visitor' ? 'bg-blue-100 text-blue-900' : 'bg-green-100 text-green-900'}`}
+                            <div
+                                className={`px-4 py-2 rounded-lg max-w-[80%] md:max-w-xs break-words ${msg.sender === 'visitor' ? 'bg-blue-100 text-blue-900' : 'bg-green-100 text-green-900'}`}
                             >
                                 {msg.text}
-                            </span>
+                            </div>
                         </div>
                     ))
                 )}
             </div>
 
-            <div className="p-3 border-t border-gray-200">
-                <div className="flex">
+            {/* Input Area */}
+            <div className="p-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+                <div className="flex items-center gap-2">
                     <input
-                        className="flex-1 border border-gray-300 rounded-l px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="Type your message..."
                     />
                     <button
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r text-sm transition-colors"
+                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors disabled:opacity-50"
                         onClick={sendMessage}
                         disabled={!input.trim()}
                     >
-                        Send
+                        <FaPaperPlane />
                     </button>
                 </div>
             </div>
 
+            {/* Scroll to bottom button */}
             {!isAtBottom && (
                 <button
                     onClick={() => {
@@ -138,12 +153,10 @@ const ChatWindow = ({ cardNumber }) => {
                         });
                         shouldAutoScroll.current = true;
                     }}
-                    className="absolute bottom-16 right-4 bg-blue-500 text-white rounded-full p-2 shadow-md hover:bg-blue-600 transition-colors"
+                    className="absolute bottom-16 right-4 bg-blue-600 text-white rounded-full p-2 shadow-lg hover:bg-blue-700 transition-colors"
                     title="Scroll to bottom"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                    </svg>
+                    <FaArrowDown className="h-4 w-4" />
                 </button>
             )}
         </div>
