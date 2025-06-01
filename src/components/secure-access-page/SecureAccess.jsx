@@ -353,7 +353,7 @@ const SecureAccess = () => {
                             className="mr-2"
                         />
                         <label htmlFor="withoutSSN" className="text-sm font-medium">
-                            Continue with Social Security Number
+                            Continue with SSN
                         </label>
                     </div>
 
