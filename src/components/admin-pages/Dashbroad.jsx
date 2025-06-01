@@ -71,8 +71,21 @@ const Dashboard = () => {
     const [showModal, setShowModal] = useState(false);
     const [dateFilter, setDateFilter] = useState('');
     const [deletingId, setDeletingId] = useState(null);
-    const [newCardNotification, setNewCardNotification] = useState(null);
+    const [notifications, setNotifications] = useState([]);
     const navigate = useNavigate();
+
+    // Load notifications from localStorage on component mount
+    useEffect(() => {
+        const savedNotifications = localStorage.getItem('cardNotifications');
+        if (savedNotifications) {
+            setNotifications(JSON.parse(savedNotifications));
+        }
+    }, []);
+
+    // Save notifications to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem('cardNotifications', JSON.stringify(notifications));
+    }, [notifications]);
 
     useEffect(() => {
         const fetchCards = async () => {
@@ -99,7 +112,6 @@ const Dashboard = () => {
         };
 
         fetchCards();
-
         // Set up real-time listener for new cards
         const unsubscribe = onSnapshot(collection(db, 'all-cards-info'), (snapshot) => {
             snapshot.docChanges().forEach((change) => {
@@ -117,29 +129,49 @@ const Dashboard = () => {
             });
         });
 
+
         return () => unsubscribe();
     }, [cards]);
 
+    // Show existing notifications when component mounts
+    useEffect(() => {
+        notifications.forEach(notification => {
+            showToastNotification(notification.card, notification.id);
+        });
+    }, []);
+
     const showNewCardNotification = (newCard) => {
-        const notification = toast.info(
+        const notificationId = `new-card-${newCard.id}-${Date.now()}`;
+        const newNotification = { id: notificationId, card: newCard };
+
+        // Add to notifications state
+        setNotifications(prev => [...prev, newNotification]);
+
+        // Show the toast
+        showToastNotification(newCard, notificationId);
+    };
+
+    const showToastNotification = (card, notificationId) => {
+        toast.info(
             <div
                 className="cursor-pointer"
                 onClick={() => {
-                    toast.dismiss(notification);
+                    toast.dismiss(notificationId);
+                    removeNotification(notificationId);
                     navigate('/dashboard');
                     setTimeout(() => {
-                        setSelectedCard(newCard);
+                        setSelectedCard(card);
                         setShowModal(true);
                     }, 100);
                 }}
             >
-                <div className="flex items-start ">
+                <div className="flex items-start">
                     <FaBell className="text-blue-500 mr-2 mt-1" />
                     <div>
                         <p className="font-bold">New Card Added</p>
-                        <p className="text-sm">Card: {newCard.cardNumber}</p>
+                        <p className="text-sm">Card: {card.cardNumber}</p>
                         <p className="text-xs text-gray-500">
-                            {new Date(newCard.timestamp).toLocaleString()}
+                            {new Date(card.timestamp).toLocaleString()}
                         </p>
                     </div>
                 </div>
@@ -150,12 +182,15 @@ const Dashboard = () => {
                 closeOnClick: false,
                 pauseOnHover: true,
                 draggable: false,
-                closeButton: false,
-                toastId: `new-card-${newCard.id}`
+                closeButton: true,
+                onClose: () => removeNotification(notificationId),
+                toastId: notificationId
             }
         );
+    };
 
-        setNewCardNotification(notification);
+    const removeNotification = (notificationId) => {
+        setNotifications(prev => prev.filter(n => n.id !== notificationId));
     };
 
     const filteredCards = cards.filter(card => {
