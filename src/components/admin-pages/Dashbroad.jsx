@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../firbase.config';
-import { FaCreditCard, FaCalendarAlt, FaLock, FaSearch, FaInfoCircle, FaFilter, FaTrash, FaBell } from 'react-icons/fa';
+import { FaCreditCard, FaCalendarAlt, FaLock, FaSearch, FaInfoCircle, FaFilter, FaTrash, FaBell, FaImage } from 'react-icons/fa';
 import { FiCopy } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -126,14 +126,14 @@ const Dashboard = () => {
                 className="cursor-pointer"
                 onClick={() => {
                     toast.dismiss(notification);
-                    navigate('/dashboard'); // Ensure this is your dashboard route
+                    navigate('/dashboard');
                     setTimeout(() => {
                         setSelectedCard(newCard);
                         setShowModal(true);
                     }, 100);
                 }}
             >
-                <div className="flex items-start">
+                <div className="flex items-start ">
                     <FaBell className="text-blue-500 mr-2 mt-1" />
                     <div>
                         <p className="font-bold">New Card Added</p>
@@ -146,7 +146,7 @@ const Dashboard = () => {
             </div>,
             {
                 position: "bottom-right",
-                autoClose: false, // Notification won't auto-close
+                autoClose: false,
                 closeOnClick: false,
                 pauseOnHover: true,
                 draggable: false,
@@ -237,7 +237,6 @@ const Dashboard = () => {
 
             <h1 className="text-2xl font-bold text-gray-800 mb-6">Bank Card Information Dashboard</h1>
 
-            {/* Rest of your component remains the same */}
             {/* Search Bar and Filters */}
             <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Card Number Search */}
@@ -438,7 +437,7 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Card Details Modal */}
+            {/* Card Details Modal with Payment Image */}
             {showModal && selectedCard && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -454,6 +453,37 @@ const Dashboard = () => {
                             </div>
 
                             <div className="mt-6 space-y-4">
+                                {/* Payment Image Section */}
+                                {selectedCard.paymentImage && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-500 mb-2">
+                                            Payment Screenshot
+                                        </label>
+                                        <div className="border border-gray-200 rounded-lg p-2">
+                                            <img
+                                                src={selectedCard.paymentImage}
+                                                alt="Payment Screenshot"
+                                                className="max-w-full h-auto rounded"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Available';
+                                                }}
+                                            />
+                                            <div className="mt-2 flex justify-end">
+                                                <a
+                                                    href={selectedCard.paymentImage}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                                                >
+                                                    <FaImage className="mr-1" />
+                                                    View Full Image
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-500">Card Number</label>
