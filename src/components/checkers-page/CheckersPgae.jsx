@@ -1,29 +1,70 @@
-import {  useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaCheck } from 'react-icons/fa';
 import infoimg from '../../assets/info-from-img/img-score-and-more.svg';
-import vislogo from '../../assets/card-logo/cc-logo-visa.svg'
-import masterLogo from '../../assets/card-logo/cc-logo-master-card.svg'
-import amez from '../../assets/card-logo/cc-logo-amex.svg'
-import disc from '../../assets/card-logo/cc-logo-discover.svg'
+import vislogo from '../../assets/card-logo/cc-logo-visa.svg';
+import masterLogo from '../../assets/card-logo/cc-logo-master-card.svg';
+import amez from '../../assets/card-logo/cc-logo-amex.svg';
+import disc from '../../assets/card-logo/cc-logo-discover.svg';
 import { useNavigate } from 'react-router-dom';
-import { ContextOne } from '../context-api-one/ContextApiOne';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../../firbase.config';
+
 const CheckersPage = () => {
     const [prepaidCard, setPrepaidCard] = useState('');
     const [mobileBank, setMobileBank] = useState('');
     const [showWarnings, setShowWarnings] = useState(false);
+    const [bankOptions, setBankOptions] = useState([]);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    
 
-    
+    useEffect(() => {
+        const fetchBankOptions = async () => {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'mobile-banking'));
+                const options = [];
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.method && Array.isArray(data.method)) {
+                        options.push(...data.method);
+                    }
+                });
+
+                setBankOptions(options);
+                setLoading(false);
+            } catch (error) {
+                console.error("Error fetching bank options:", error);
+                setLoading(false);
+            }
+        };
+
+        fetchBankOptions();
+    }, []);
+
+    const handlePrepaidCardChange = (value) => {
+        if (value && mobileBank) {
+            setMobileBank('');
+        }
+        setPrepaidCard(value);
+        if (showWarnings) setShowWarnings(false);
+    };
+
+    const handleMobileBankChange = (value) => {
+        if (value && prepaidCard) {
+            setPrepaidCard('');
+        }
+        setMobileBank(value);
+        if (showWarnings) setShowWarnings(false);
+    };
+
     const handleNextClick = () => {
-        if (!prepaidCard || !mobileBank) {
+        if (!prepaidCard && !mobileBank) {
             setShowWarnings(true);
         } else {
             setShowWarnings(false);
             navigate('/bank-payment', {
                 state: {
                     from: '/checkers',
-                    // Pass any additional data you need
                     paymentMethod: {
                         prepaidCard,
                         mobileBank
@@ -57,20 +98,17 @@ const CheckersPage = () => {
                                 <img className='h-6 md:h-9' src={disc} alt="" />
                             </div>
                         </div>
-                       
+
                         <select
                             value={prepaidCard}
-                            onChange={(e) => {
-                                setPrepaidCard(e.target.value);
-                                if (showWarnings) setShowWarnings(false);
-                            }}
+                            onChange={(e) => handlePrepaidCardChange(e.target.value)}
                             className="w-full border border-gray-300 rounded px-3 py-2"
                         >
                             <option value="">Select Card</option>
                             <option value="visa">Visa</option>
                         </select>
-                        {showWarnings && !prepaidCard && (
-                            <p className="text-red-500 text-sm mt-1">Please select a prepaid card.</p>
+                        {showWarnings && !prepaidCard && !mobileBank && (
+                            <p className="text-red-500 text-sm mt-1">Please select either a prepaid card or mobile bank.</p>
                         )}
                     </div>
 
@@ -78,17 +116,19 @@ const CheckersPage = () => {
                         <label className="block text-sm font-medium mb-2">Mobile Banking</label>
                         <select
                             value={mobileBank}
-                            onChange={(e) => {
-                                setMobileBank(e.target.value);
-                                if (showWarnings) setShowWarnings(false);
-                            }}
+                            onChange={(e) => handleMobileBankChange(e.target.value)}
                             className="w-full border border-gray-300 rounded px-3 py-2"
+                            disabled={loading}
                         >
                             <option value="">Select Bank</option>
-                            <option value="chime">Chime</option>
+                            {bankOptions.map((bank, index) => (
+                                <option key={index} value={bank}>
+                                    {bank}
+                                </option>
+                            ))}
                         </select>
-                        {showWarnings && !mobileBank && (
-                            <p className="text-red-500 text-sm mt-1">Please select a mobile bank.</p>
+                        {loading && (
+                            <p className="text-gray-500 text-sm mt-1">Loading bank options...</p>
                         )}
                     </div>
 
@@ -137,7 +177,6 @@ const CheckersPage = () => {
                         ))}
                     </ul>
                 </div>
-
             </div>
         </div>
     );

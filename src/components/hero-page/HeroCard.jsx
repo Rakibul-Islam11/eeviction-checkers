@@ -12,22 +12,25 @@ const HeroCard = () => {
             id: 1,
             title: 'Standard Quarterly Plan',
             price: '119.85',
-            cycle: 'Befor 3 months',
+            cycle: 'Previous 3 months',
             setup: '',
+            isBestValue: true
         },
         {
             id: 2,
             title: 'Basic Monthly Plan',
             price: '39.95',
-            cycle: 'Befor month',
+            cycle: 'Previous month',
             setup: '+$3 Setup fee',
+            isBestValue: true
         },
         {
             id: 3,
             title: 'Premium Semi-Annual Plan',
             price: '239.70',
-            cycle: 'Befor 6 months',
+            cycle: 'Previous 6 months',
             setup: '',
+            isBestValue: true
         },
     ];
 
@@ -46,7 +49,7 @@ const HeroCard = () => {
 
             {/* Grid Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {plans.map((plan, index) => (
+                {plans.map((plan) => (
                     <div
                         key={plan.id}
                         className="bg-white shadow-md border border-black rounded-md overflow-hidden flex flex-col justify-between"
@@ -54,7 +57,7 @@ const HeroCard = () => {
                         {/* Image with badge */}
                         <div className="relative">
                             <img src={cardimg} alt="card" className="w-full h-[140px] sm:h-[160px] object-cover" />
-                            {index === 0 && ( // Only show badge on first card (or whichever you prefer)
+                            {plan.isBestValue && (
                                 <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-[12px] sm:text-[13px] px-3 py-[2px] font-bold rounded">
                                     Best Value
                                 </span>

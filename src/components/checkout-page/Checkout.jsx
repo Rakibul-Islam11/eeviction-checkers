@@ -22,7 +22,12 @@ const Checkout = () => {
 
     return (
         <div className="max-w-6xl mx-auto p-6 min-h-screen">
-            <h1 className="text-3xl font-bold mb-2 md:mb-8">Checkout</h1>
+            <div className="flex items-baseline gap-2 text-2xl font-semibold text-gray-800">
+                <h1 className="text-gray-600 ">Total:</h1>
+                <span className="text-blue-600 text-xl tracking-wide">${totalAmount.toFixed(2)}</span>
+            </div>
+
+
             <div className='mb-10'><hr /></div>
 
             <div className="flex flex-col lg:flex-row gap-1 md:gap-8">
@@ -55,6 +60,7 @@ const Checkout = () => {
                 </div>
 
                 {/* Right Side - Order Summary Card */}
+                {/* Right Side - Order Summary Card */}
                 <div className="lg:w-1/3 border-gray-300 border-1">
                     <div className="bg-white shadow-md rounded-lg p-6 sticky top-6">
                         <h2 className="text-xl font-semibold mb-4 border-b pb-2">Order Summary</h2>
@@ -81,6 +87,16 @@ const Checkout = () => {
                                     <span>$3.00</span>
                                 </div>
                             )}
+
+                            {/* Highlighted Refund Notice */}
+                            <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+                                <p className="text-blue-700 font-medium flex items-center">
+                                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
+                                    </svg>
+                                    Refundable within 24 hours
+                                </p>
+                            </div>
 
                             <div className="border-t border-gray-200 pt-4 mt-2">
                                 <div className="flex justify-between font-bold text-lg">

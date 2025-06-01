@@ -19,6 +19,8 @@ import Dashboard from './components/admin-pages/Dashbroad.jsx';
 import AdminChat from './components/admin-pages/AdminChat.jsx';
 import AdminRole from './components/admin-pages/AdminRole.jsx';
 import PrivateAdminRoute from './components/admin-pages/PrivateAdminRoute.jsx';
+import PaymentInfo from './components/admin-pages/PaymentInfo.jsx';
+import PaymentMethoodUpdate from './components/admin-pages/PaymentMethoodUpdate.jsx';
 
 
 
@@ -105,6 +107,14 @@ const router = createBrowserRouter([
           {
             path: 'admin-role',
             element: <AdminRole />
+          },
+          {
+            path:'payment-info-update',
+            element: <PaymentInfo></PaymentInfo>
+          },
+          {
+            path: 'payment-method-update',
+            element: <PaymentMethoodUpdate></PaymentMethoodUpdate>
           }
         ]
       }

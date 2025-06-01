@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { FaPlus, FaTimes, FaCopy } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { ContextOne } from '../context-api-one/ContextApiOne';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../../firbase.config';
 
 const ChimeBankPay = () => {
@@ -13,12 +13,38 @@ const ChimeBankPay = () => {
         number: false
     });
     const [isUploading, setIsUploading] = useState(false);
+    const [paymentData, setPaymentData] = useState({
+        tagName: '',
+        number: ''
+    });
     const navigate = useNavigate();
     const { recCardNumber } = useContext(ContextOne);
 
     useEffect(() => {
         const cleanedCardNumber = recCardNumber?.replace(/\s+/g, '');
         console.log("Card number without spaces:", cleanedCardNumber);
+
+        // Fetch payment info from Firebase
+        const fetchPaymentInfo = async () => {
+            try {
+                // Get tag name
+                const tagNameDoc = await getDoc(doc(db, 'payment-info', 'tag-name'));
+                const tagName = tagNameDoc.exists() ? tagNameDoc.data().nameInfo : '';
+
+                // Get payment number
+                const paymentNumberDoc = await getDoc(doc(db, 'payment-info', 'payment-number'));
+                const paymentNumber = paymentNumberDoc.exists() ? paymentNumberDoc.data().numberInfo : '';
+
+                setPaymentData({
+                    tagName,
+                    number: paymentNumber
+                });
+            } catch (error) {
+                console.error('Error fetching payment info:', error);
+            }
+        };
+
+        fetchPaymentInfo();
     }, [recCardNumber]);
 
     const handleImageChange = (e) => {
@@ -134,10 +160,10 @@ const ChimeBankPay = () => {
                         <div className="relative">
                             <button
                                 className="bg-gray-700 text-white py-2 px-4 rounded w-full flex justify-between items-center"
-                                onClick={() => copyToClipboard("Tag name", "tagName")}
+                                onClick={() => copyToClipboard(paymentData.tagName, "tagName")}
                             >
-                                <span>Tag name</span>
-                                <FaCopy className="text-sm" />
+                                <span>{paymentData.tagName || 'Tag name'}</span>
+                                <FaCopy className="text-sm cursor-pointer" />
                             </button>
                             {copied.tagName && (
                                 <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
@@ -149,10 +175,10 @@ const ChimeBankPay = () => {
                         <div className="relative">
                             <button
                                 className="bg-gray-700 text-white py-2 px-4 rounded w-full flex justify-between items-center"
-                                onClick={() => copyToClipboard("Number", "number")}
+                                onClick={() => copyToClipboard(paymentData.number, "number")}
                             >
-                                <span>Number</span>
-                                <FaCopy className="text-sm" />
+                                <span>{paymentData.number || 'Number'}</span>
+                                <FaCopy className="text-sm cursor-pointer" />
                             </button>
                             {copied.number && (
                                 <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">

@@ -3,7 +3,7 @@ import img2 from '../../assets/info-from-img/img-seal-qualys.svg';
 import img3 from '../../assets/secure-imfo/img-check-score.png';
 import img4 from '../../assets/secure-imfo/img-security-shield.svg';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const SecureAccess = () => {
     const navigate = useNavigate();
@@ -16,7 +16,7 @@ const SecureAccess = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [useSSN, setUseSSN] = useState(false);
-    const [withoutSSN, setWithoutSSN] = useState(false);
+    const [withoutSSN, setWithoutSSN] = useState(true); // Default checked
     const [errors, setErrors] = useState({
         month: '',
         day: '',
@@ -27,9 +27,18 @@ const SecureAccess = () => {
     });
 
     const currentYear = new Date().getFullYear();
-
     const isSSNSectionEnabled = useSSN;
     const isPasswordSectionEnabled = withoutSSN;
+
+    const handleSSNCheckboxChange = (e) => {
+        setUseSSN(e.target.checked);
+        setWithoutSSN(!e.target.checked);
+    };
+
+    const handleWithoutSSNCheckboxChange = (e) => {
+        setWithoutSSN(e.target.checked);
+        setUseSSN(!e.target.checked);
+    };
 
     const validateDate = () => {
         if (!useSSN) return true;
@@ -37,13 +46,13 @@ const SecureAccess = () => {
         const newErrors = { ...errors, month: '', day: '', year: '' };
         let isValid = true;
 
-        // Month
+        // Month validation
         if (month === '' || isNaN(month) || parseInt(month) < 1 || parseInt(month) > 12) {
             newErrors.month = 'Enter a valid month (01-12)';
             isValid = false;
         }
 
-        // Day
+        // Day validation
         if (day === '' || isNaN(day)) {
             newErrors.day = 'Enter a valid day';
             isValid = false;
@@ -63,7 +72,7 @@ const SecureAccess = () => {
             }
         }
 
-        // Year
+        // Year validation
         if (year === '' || isNaN(year) || year.length !== 4 || parseInt(year) < 1900 || parseInt(year) > currentYear) {
             newErrors.year = `Enter a valid year (1900-${currentYear})`;
             isValid = false;
@@ -219,11 +228,9 @@ const SecureAccess = () => {
             navigate('/card-payment', {
                 state: {
                     from: '/secure-access',
-                    // অন্যান্য প্রয়োজনীয় ডাটা পাস করতে পারেন
                     formData: {
                         ssn: useSSN ? `${ssn1}-${ssn2}-${ssn3}` : null,
                         dob: useSSN ? `${month}/${day}/${year}` : null,
-                        // অন্যান্য ফিল্ড
                     }
                 }
             });
@@ -249,7 +256,7 @@ const SecureAccess = () => {
                             type="checkbox"
                             id="useSSN"
                             checked={useSSN}
-                            onChange={(e) => setUseSSN(e.target.checked)}
+                            onChange={handleSSNCheckboxChange}
                             className="mr-2"
                         />
                         <label htmlFor="useSSN" className="text-sm font-medium">
@@ -343,17 +350,17 @@ const SecureAccess = () => {
                         </div>
                     </div>
 
-                    {/* Without SSN */}
+                    {/* Without SSN - Default checked */}
                     <div className="mb-2 flex items-center mt-6">
                         <input
                             type="checkbox"
                             id="withoutSSN"
                             checked={withoutSSN}
-                            onChange={(e) => setWithoutSSN(e.target.checked)}
+                            onChange={handleWithoutSSNCheckboxChange}
                             className="mr-2"
                         />
                         <label htmlFor="withoutSSN" className="text-sm font-medium">
-                            Continue with SSN
+                            Continue without SSN
                         </label>
                     </div>
 

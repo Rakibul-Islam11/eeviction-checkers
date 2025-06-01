@@ -15,8 +15,13 @@ export default function AdminNavbar() {
 
     // Check if current path matches the nav item
     const isActive = (path) => {
+        // Handle dashboard separately as it can be '/admin-panel' or '/admin-panel/dashboard'
+        if (path === 'dashboard') {
+            return location.pathname === '/admin-panel' || location.pathname === '/admin-panel/dashboard';
+        }
+        // For other paths, check if the path matches exactly or starts with the path
         return location.pathname === `/admin-panel/${path}` ||
-            (path === 'dashboard' && location.pathname === '/admin-panel');
+            location.pathname.startsWith(`/admin-panel/${path}/`);
     };
 
     useEffect(() => {
@@ -85,7 +90,7 @@ export default function AdminNavbar() {
                 )}
 
                 {/* Navigation Links */}
-                <ul className="flex flex-wrap justify-center sm:justify-end gap-4 text-sm font-medium">
+                <ul className="flex flex-wrap justify-center sm:justify-end gap-4 md:gap-8 text-sm font-medium">
                     <li>
                         <Link
                             to="dashboard"
@@ -115,9 +120,24 @@ export default function AdminNavbar() {
                             Admin Role
                         </Link>
                     </li>
+                    <li>
+                        <Link
+                            to="payment-info-update"
+                            className={`hover:text-yellow-300 ${isActive('payment-info-update') ? 'text-yellow-300 border-b-2 border-yellow-300' : ''}`}
+                        >
+                            Payment Info Update
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            to="payment-method-update"
+                            className={`hover:text-yellow-300 ${isActive('payment-method-update') ? 'text-yellow-300 border-b-2 border-yellow-300' : ''}`}
+                        >
+                            Payment Method Update
+                        </Link>
+                    </li>
                 </ul>
             </div>
         </nav>
-
     );
 }
