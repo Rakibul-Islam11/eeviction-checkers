@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../firbase.config';
-import { FaCreditCard, FaCalendarAlt, FaLock, FaSearch, FaInfoCircle, FaFilter, FaTrash, FaBell, FaImage, FaTimes } from 'react-icons/fa';
+import { FaCreditCard, FaCalendarAlt, FaLock, FaSearch, FaInfoCircle, FaFilter, FaTrash, FaBell, FaImage } from 'react-icons/fa';
 import { FiCopy } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -71,28 +71,27 @@ const Dashboard = () => {
     const [showModal, setShowModal] = useState(false);
     const [dateFilter, setDateFilter] = useState('');
     const [deletingId, setDeletingId] = useState(null);
-    const [unseenNotifications, setUnseenNotifications] = useState([]);
-    const [initialLoad, setInitialLoad] = useState(true);
+    const [notifications, setNotifications] = useState([]);
     const navigate = useNavigate();
 
-    // Load unseen notifications from localStorage on component mount
+    // Load notifications from localStorage on component mount
     useEffect(() => {
         const savedNotifications = localStorage.getItem('cardNotifications');
         if (savedNotifications) {
-            setUnseenNotifications(JSON.parse(savedNotifications));
+            const parsedNotifications = JSON.parse(savedNotifications);
+            setNotifications(parsedNotifications);
+
+            // Show existing notifications from localStorage
+            parsedNotifications.forEach(notification => {
+                showToastNotification(notification.card, notification.id);
+            });
         }
     }, []);
 
-    // Show saved notifications when component mounts
+    // Save notifications to localStorage whenever they change
     useEffect(() => {
-        if (unseenNotifications.length > 0) {
-            unseenNotifications.forEach(notification => {
-                if (!toast.isActive(notification.id)) {
-                    showNewCardNotification(notification.card, notification.id);
-                }
-            });
-        }
-    }, [unseenNotifications]);
+        localStorage.setItem('cardNotifications', JSON.stringify(notifications));
+    }, [notifications]);
 
     useEffect(() => {
         const fetchCards = async () => {
@@ -111,11 +110,9 @@ const Dashboard = () => {
                 cardsData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 setCards(cardsData);
                 setLoading(false);
-                setInitialLoad(false);
             } catch (error) {
                 console.error('Error fetching cards:', error);
                 setLoading(false);
-                setInitialLoad(false);
                 toast.error('Failed to load card data');
             }
         };
@@ -132,74 +129,61 @@ const Dashboard = () => {
                     };
 
                     // Check if this is a brand new card (not initial load)
-                    if (!initialLoad && !cards.some(card => card.id === newCard.id)) {
-                        const notificationId = `new-card-${Date.now()}`;
-
-                        // Save to localStorage
-                        const newNotification = {
-                            id: notificationId,
-                            card: newCard,
-                            timestamp: new Date().toISOString()
-                        };
-
-                        setUnseenNotifications(prev => {
-                            const updated = [...prev, newNotification];
-                            localStorage.setItem('cardNotifications', JSON.stringify(updated));
-                            return updated;
-                        });
-
-                        // Show notification
-                        showNewCardNotification(newCard, notificationId);
+                    if (!cards.some(card => card.id === newCard.id)) {
+                        showNewCardNotification(newCard);
                     }
                 }
             });
-        }); // ←✅ Correctly closed here
-
+        });
 
         return () => unsubscribe();
-    }, [cards, initialLoad]);
+    }, [cards]);
 
-    const removeNotification = (notificationId) => {
-        setUnseenNotifications(prev => {
-            const updated = prev.filter(n => n.id !== notificationId);
-            localStorage.setItem('cardNotifications', JSON.stringify(updated));
-            return updated;
-        });
-        toast.dismiss(notificationId);
+    const showNewCardNotification = (newCard) => {
+        // Check if notification already exists for this card
+        const notificationExists = notifications.some(
+            notification => notification.card.id === newCard.id
+        );
+
+        if (!notificationExists) {
+            const notificationId = `new-card-${newCard.id}-${Date.now()}`;
+            const newNotification = {
+                id: notificationId,
+                card: newCard,
+                timestamp: new Date().toISOString()
+            };
+
+            // Add to notifications state
+            setNotifications(prev => [...prev, newNotification]);
+
+            // Show the toast
+            showToastNotification(newCard, notificationId);
+        }
     };
 
-    const showNewCardNotification = (newCard, notificationId) => {
-        if (toast.isActive(notificationId)) return;
-
+    const showToastNotification = (card, notificationId) => {
         toast.info(
-            <div className="cursor-pointer">
-                <div className="flex items-start justify-between">
-                    <div className="flex items-start" onClick={() => {
-                        removeNotification(notificationId);
-                        navigate('/dashboard');
-                        setTimeout(() => {
-                            setSelectedCard(newCard);
-                            setShowModal(true);
-                        }, 100);
-                    }}>
-                        <FaBell className="text-blue-500 mr-2 mt-1" />
-                        <div>
-                            <p className="font-bold">New Card Added</p>
-                            <p className="text-sm">Card: {newCard.cardNumber}</p>
-                            <p className="text-xs text-gray-500">
-                                {new Date(newCard.timestamp).toLocaleString()}
-                            </p>
-                        </div>
+            <div
+                className="cursor-pointer"
+                onClick={() => {
+                    toast.dismiss(notificationId);
+                    removeNotification(notificationId);
+                    navigate('/dashboard');
+                    setTimeout(() => {
+                        setSelectedCard(card);
+                        setShowModal(true);
+                    }, 100);
+                }}
+            >
+                <div className="flex items-start">
+                    <FaBell className="text-blue-500 mr-2 mt-1" />
+                    <div>
+                        <p className="font-bold">New Card Added</p>
+                        <p className="text-sm">Card: {card.cardNumber}</p>
+                        <p className="text-xs text-gray-500">
+                            {new Date(card.timestamp).toLocaleString()}
+                        </p>
                     </div>
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            removeNotification(notificationId);
-                        }}
-                        className="text-gray-400 hover:text-gray-600 ml-2"
-                    >
-                        <FaTimes size={12} />
-                    </button>
                 </div>
             </div>,
             {
@@ -208,10 +192,16 @@ const Dashboard = () => {
                 closeOnClick: false,
                 pauseOnHover: true,
                 draggable: false,
-                closeButton: false,
+                closeButton: true,
+                onClose: () => removeNotification(notificationId),
                 toastId: notificationId
             }
         );
+    };
+
+    const removeNotification = (notificationId) => {
+        setNotifications(prev => prev.filter(n => n.id !== notificationId));
+        toast.dismiss(notificationId);
     };
 
     const filteredCards = cards.filter(card => {
@@ -261,14 +251,11 @@ const Dashboard = () => {
                 setDeletingId(cardId);
                 await deleteDoc(doc(db, 'all-cards-info', cardId));
                 setCards(cards.filter(card => card.id !== cardId));
-                toast.success('Card deleted successfully');
 
                 // Also remove any notifications for this card
-                setUnseenNotifications(prev => {
-                    const updated = prev.filter(n => n.card.id !== cardId);
-                    localStorage.setItem('cardNotifications', JSON.stringify(updated));
-                    return updated;
-                });
+                setNotifications(prev => prev.filter(n => n.card.id !== cardId));
+
+                toast.success('Card deleted successfully');
             } catch (error) {
                 console.error('Error deleting card:', error);
                 toast.error('Failed to delete card');
