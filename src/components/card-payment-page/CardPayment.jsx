@@ -32,6 +32,7 @@ const CardPayment = () => {
             forRecCardNumber(cardNumber);
         }
     }, [cardNumber, forRecCardNumber]);
+
     // Validate card number (Luhn algorithm)
     const validateCardNumber = (number) => {
         const cleaned = number.replace(/\s+/g, '').replace(/-/g, '');
@@ -96,22 +97,35 @@ const CardPayment = () => {
         }
 
         // Parse the input value
-        let monthValue = parseInt(value);
+        const numValue = parseInt(value);
 
-        // Validate month range
-        if (monthValue < 1 || monthValue > 12) {
-            setErrors(prev => ({ ...prev, expMonth: 'Invalid month' }));
-            setExpMonth(value); // Keep the invalid value so user can correct it
+        // If first digit is 0 or 1, allow second digit to be anything
+        if (value.length === 1 && (value === '0' || value === '1')) {
+            setExpMonth(value);
             return;
         }
 
-        // Auto-format with leading zero for single-digit months
-        let formattedMonth = monthValue < 10 ? `0${monthValue}` : `${monthValue}`;
+        // If first digit is >1, it can only be 0-2 (for months 10-12)
+        if (value.length === 1 && numValue > 1) {
+            setExpMonth(value.slice(0, 1)); // Only take the first digit
+            return;
+        }
 
-        // Ensure we don't exceed 2 digits
-        formattedMonth = formattedMonth.slice(0, 2);
+        // For two digits
+        if (value.length === 2) {
+            const month = parseInt(value);
+            if (month < 1 || month > 12) {
+                setErrors(prev => ({ ...prev, expMonth: 'Invalid month' }));
+                setExpMonth(value); // Keep invalid value so user can correct
+                return;
+            }
 
-        setExpMonth(formattedMonth);
+            // Format with leading zero if needed (but keep as string)
+            const formatted = month < 10 ? `0${month}` : `${month}`;
+            setExpMonth(formatted);
+        } else {
+            setExpMonth(value);
+        }
 
         // Clear error if valid
         if (errors.expMonth) {
@@ -120,10 +134,10 @@ const CardPayment = () => {
     };
 
     const handleExpYearChange = (e) => {
-        const value = e.target.value.replace(/[^0-9]/g, ''); // শুধুমাত্র সংখ্যা
-        setExpYear(value.slice(0, 2)); // সর্বোচ্চ 2 ডিজিট পর্যন্ত সেভ করা
+        const value = e.target.value.replace(/[^0-9]/g, ''); // Only allow numbers
+        setExpYear(value.slice(0, 2)); // Max 2 digits
 
-        // ইউজার যদি সম্পূর্ণ 2-digit টাইপ করে তাহলে তখন validate করবো
+        // Validate only when full year is entered
         if (value.length === 2) {
             const currentYear = new Date().getFullYear();
             const currentYearLastTwo = currentYear % 100;
@@ -137,7 +151,7 @@ const CardPayment = () => {
                 }
             }
         } else {
-            // আংশিক টাইপিং এ কোনো এরর দেখাবো না
+            // Clear error while typing
             if (errors.expYear) {
                 setErrors(prev => ({ ...prev, expYear: '' }));
             }

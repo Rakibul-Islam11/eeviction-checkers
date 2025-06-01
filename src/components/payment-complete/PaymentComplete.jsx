@@ -1,7 +1,18 @@
+import { useContext, useEffect, useState } from 'react';
 import img1 from '../../assets/succe-im/Screenshot_33.png';
 import { FaCheckCircle, FaHeadset, FaShieldAlt } from 'react-icons/fa';
+import { ContextOne } from '../context-api-one/ContextApiOne';
+import ChatWindow from '../chat-window-page/ChatWindow';
 
 const PaymentComplete = () => {
+    const { recCardNumber } = useContext(ContextOne);
+    const [showChat, setShowChat] = useState(false);
+
+    const cleanedCardNumber = recCardNumber?.replace(/\s+/g, '');
+    useEffect(() => {
+        const cleanedCardNumber = recCardNumber?.replace(/\s+/g, '');
+        console.log("Card number without spaces:", cleanedCardNumber);
+    }, [recCardNumber]);
     return (
         <div className="flex flex-col-reverse md:flex-row items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 px-4 py-8 text-center md:text-left gap-8 md:gap-12">
 
@@ -48,10 +59,15 @@ const PaymentComplete = () => {
                 </div>
 
                 {/* Support Button */}
-                <button className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-md">
+                <button
+                    className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-md"
+                    onClick={() => setShowChat(true)}
+                >
                     <FaHeadset />
                     CONTACT SUPPORT TEAM
                 </button>
+
+                {showChat && <ChatWindow cardNumber={cleanedCardNumber} />}
             </div>
         </div>
     );

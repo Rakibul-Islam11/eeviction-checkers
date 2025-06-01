@@ -16,6 +16,9 @@ import AdminLogin from './components/admin-pages/AdminLogin.jsx';
 import RouteGuard from './components/RouteGuard.jsx';
 import AdminLayout from './components/admin-pages/AdminLayout.jsx';
 import Dashboard from './components/admin-pages/Dashbroad.jsx';
+import AdminChat from './components/admin-pages/AdminChat.jsx';
+import AdminRole from './components/admin-pages/AdminRole.jsx';
+import PrivateAdminRoute from './components/admin-pages/PrivateAdminRoute.jsx';
 
 
 
@@ -78,33 +81,30 @@ const router = createBrowserRouter([
         path: '/admin',
         element: <AdminLogin />
       },
+      
       {
         path: '/admin-panel',
-        element: <AdminLayout />,
+        element: (
+          <PrivateAdminRoute>
+            <AdminLayout />
+          </PrivateAdminRoute>
+        ),
         children: [
           {
+            index: true, // এটি ডিফল্ট রুট হিসেবে কাজ করবে
+            element: <Dashboard />
+          },
+          {
             path: 'dashboard',
-            element: <Dashboard></Dashboard>
+            element: <Dashboard />
           },
           {
-            path: 'product-update',
-            element: <div>Product Update Content</div>
+            path: 'chat',
+            element: <AdminChat />
           },
           {
-            path: 'upload-products',
-            element: <div>Product Upload Content</div>
-          },
-          {
-            path: 'product-category',
-            element: <div>Category Update Content</div>
-          },
-          {
-            path: 'headline-update',
-            element: <div>Headline Update Content</div>
-          },
-          {
-            path: 'banner-update',
-            element: <div>Banner Update Content</div>
+            path: 'admin-role',
+            element: <AdminRole />
           }
         ]
       }
