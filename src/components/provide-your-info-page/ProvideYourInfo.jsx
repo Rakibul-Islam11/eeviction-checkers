@@ -119,7 +119,13 @@ const ProvideYourInfo = () => {
         e.preventDefault();
 
         if (validateForm()) {
-            navigate('/secure-access');
+            navigate('/secure-access', {
+                state: {
+                    from: '/provide-your-info',
+                    // Add any other state you need to pass
+                    formData: formData
+                }
+            });
         }
     };
 

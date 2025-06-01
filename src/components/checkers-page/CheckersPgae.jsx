@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {  useState } from 'react';
 import { FaCheck } from 'react-icons/fa';
 import infoimg from '../../assets/info-from-img/img-score-and-more.svg';
 import vislogo from '../../assets/card-logo/cc-logo-visa.svg'
@@ -6,20 +6,30 @@ import masterLogo from '../../assets/card-logo/cc-logo-master-card.svg'
 import amez from '../../assets/card-logo/cc-logo-amex.svg'
 import disc from '../../assets/card-logo/cc-logo-discover.svg'
 import { useNavigate } from 'react-router-dom';
+import { ContextOne } from '../context-api-one/ContextApiOne';
 const CheckersPage = () => {
     const [prepaidCard, setPrepaidCard] = useState('');
     const [mobileBank, setMobileBank] = useState('');
     const [showWarnings, setShowWarnings] = useState(false);
     const navigate = useNavigate();
+    
 
+    
     const handleNextClick = () => {
         if (!prepaidCard || !mobileBank) {
             setShowWarnings(true);
         } else {
             setShowWarnings(false);
-            // Proceed to next step (e.g., navigate or submit)
-
-            navigate('/bank-payment'); // রিডাইরেক্ট এখানে
+            navigate('/bank-payment', {
+                state: {
+                    from: '/checkers',
+                    // Pass any additional data you need
+                    paymentMethod: {
+                        prepaidCard,
+                        mobileBank
+                    }
+                }
+            });
         }
     };
 

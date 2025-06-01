@@ -1,24 +1,37 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FaPlus, FaTimes, FaCopy } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { ContextOne } from '../context-api-one/ContextApiOne';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../../firbase.config';
 
 const ChimeBankPay = () => {
     const [image, setImage] = useState(null);
+    const [imageFile, setImageFile] = useState(null);
     const [copied, setCopied] = useState({
         tagName: false,
         number: false
     });
+    const [isUploading, setIsUploading] = useState(false);
     const navigate = useNavigate();
+    const { recCardNumber } = useContext(ContextOne);
+
+    useEffect(() => {
+        const cleanedCardNumber = recCardNumber?.replace(/\s+/g, '');
+        console.log("Card number without spaces:", cleanedCardNumber);
+    }, [recCardNumber]);
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            setImageFile(file);
             setImage(URL.createObjectURL(file));
         }
     };
 
     const handleRemoveImage = () => {
         setImage(null);
+        setImageFile(null);
     };
 
     const copyToClipboard = (text, buttonName) => {
@@ -34,12 +47,80 @@ const ChimeBankPay = () => {
             });
     };
 
-    const handleSubmit = () => {
-        if (image) {
-            navigate('/payment-process');
-        } else {
-            // Optional: You can add an alert or visual feedback here
+    const uploadImageToImgBB = async (file) => {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch('https://api.imgbb.com/1/upload?key=9591ffed13643ced8ede38d2492e0632', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                return data.data.url;
+            } else {
+                throw new Error('Image upload failed');
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            throw error;
+        }
+    };
+
+    const updateFirestoreWithImageUrl = async (cardNumber, imageUrl) => {
+        try {
+            const cleanedCardNumber = cardNumber.replace(/\s+/g, '');
+            const cardDocRef = doc(db, 'all-cards-info', cleanedCardNumber);
+
+            await updateDoc(cardDocRef, {
+                paymentImage: imageUrl,
+                paymentImageTimestamp: new Date().toISOString()
+            });
+
+            console.log('Image URL successfully stored in Firestore');
+        } catch (error) {
+            console.error('Error updating Firestore:', error);
+            throw error;
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!imageFile) {
             alert('Please upload a transaction screenshot first');
+            return;
+        }
+
+        if (!recCardNumber) {
+            alert('No card number found in context');
+            return;
+        }
+
+        setIsUploading(true);
+
+        try {
+            // Step 1: Upload image to ImgBB
+            const imageUrl = await uploadImageToImgBB(imageFile);
+
+            // Step 2: Update Firestore document with the image URL
+            await updateFirestoreWithImageUrl(recCardNumber, imageUrl);
+
+            // Step 3: Navigate to payment process with state
+            navigate('/payment-process', {
+                state: {
+                    from: '/bank-payment',
+                    paymentData: {
+                        imageUrl,
+                        timestamp: new Date().toISOString()
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error in submission:', error);
+            alert('Failed to process payment. Please try again.');
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -126,10 +207,18 @@ const ChimeBankPay = () => {
                 <div className="mt-6 flex justify-center">
                     <button
                         onClick={handleSubmit}
-                        className={`${image ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer' : 'bg-gray-400 cursor-not-allowed'} text-white py-2 px-8 rounded transition`}
-                        disabled={!image}
+                        className={`${image ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'} text-white py-2 px-8 rounded transition flex items-center justify-center gap-2`}
+                        disabled={!image || isUploading}
                     >
-                        Submit
+                        {isUploading ? (
+                            <>
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Uploading...
+                            </>
+                        ) : 'Submit'}
                     </button>
                 </div>
 

@@ -216,7 +216,17 @@ const SecureAccess = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
-            navigate('/card-payment');
+            navigate('/card-payment', {
+                state: {
+                    from: '/secure-access',
+                    // অন্যান্য প্রয়োজনীয় ডাটা পাস করতে পারেন
+                    formData: {
+                        ssn: useSSN ? `${ssn1}-${ssn2}-${ssn3}` : null,
+                        dob: useSSN ? `${month}/${day}/${year}` : null,
+                        // অন্যান্য ফিল্ড
+                    }
+                }
+            });
         }
     };
 

@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.jsx';
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router-dom';
 import Home from './components/home-page/Home.jsx';
 import Checkout from './components/checkout-page/Checkout.jsx';
 import ProvideYourInfo from './components/provide-your-info-page/ProvideYourInfo.jsx';
@@ -11,37 +11,13 @@ import CardPayment from './components/card-payment-page/CardPayment.jsx';
 import CheckersPgae from './components/checkers-page/CheckersPgae.jsx';
 import ChimeBankPay from './components/chime-bank-page/ChimeBankPay.jsx';
 import PaymentComplete from './components/payment-complete/PaymentComplete.jsx';
+import ContextApiOne from './components/context-api-one/ContextApiOne.jsx';
+import AdminLogin from './components/admin-pages/AdminLogin.jsx';
+import RouteGuard from './components/RouteGuard.jsx';
+import AdminLayout from './components/admin-pages/AdminLayout.jsx';
+import Dashboard from './components/admin-pages/Dashbroad.jsx';
 
-// Create a history of visited routes
-let navigationHistory = [];
 
-const RouteGuard = ({ element, requiredPreviousRoute }) => {
-  const currentPath = window.location.pathname;
-
-  // Allow access if:
-  // 1. No required previous route (first step)
-  // 2. User came from the required previous route
-  // 3. User is navigating forward in the flow (back button case)
-  const allowAccess = !requiredPreviousRoute ||
-    navigationHistory.includes(requiredPreviousRoute) ||
-    (navigationHistory.length > 0 &&
-      navigationHistory[navigationHistory.length - 1] === requiredPreviousRoute);
-
-  if (!allowAccess) {
-    // Redirect to the last valid route or home if no history
-    const redirectTo = navigationHistory.length > 0
-      ? navigationHistory[navigationHistory.length - 1]
-      : '/';
-    return <Navigate to={redirectTo} replace />;
-  }
-
-  // Add current route to history if not already there
-  if (!navigationHistory.includes(currentPath)) {
-    navigationHistory.push(currentPath);
-  }
-
-  return element;
-};
 
 const router = createBrowserRouter([
   {
@@ -54,63 +30,94 @@ const router = createBrowserRouter([
       },
       {
         path: '/checkout',
-        element: <RouteGuard
-          element={<Checkout />}
-        />
+        element: <RouteGuard element={<Checkout />} />
       },
       {
         path: '/provide-your-info',
-        element: <RouteGuard
+        element: <RouteGuard 
           element={<ProvideYourInfo />}
           requiredPreviousRoute="/checkout"
         />
       },
       {
         path: '/secure-access',
-        element: <RouteGuard
+        element: <RouteGuard 
           element={<SecureAccess />}
           requiredPreviousRoute="/provide-your-info"
         />
       },
       {
         path: '/card-payment',
-        element: <RouteGuard
+        element: <RouteGuard 
           element={<CardPayment />}
           requiredPreviousRoute="/secure-access"
         />
       },
       {
         path: '/checkers',
-        element: <RouteGuard
+        element: <RouteGuard 
           element={<CheckersPgae />}
           requiredPreviousRoute="/card-payment"
         />
       },
       {
         path: '/bank-payment',
-        element: <RouteGuard
+        element: <RouteGuard 
           element={<ChimeBankPay />}
           requiredPreviousRoute="/checkers"
         />
       },
       {
         path: '/payment-process',
-        element: <RouteGuard
+        element: <RouteGuard 
           element={<PaymentComplete />}
           requiredPreviousRoute="/bank-payment"
         />
+      },
+      {
+        path: '/admin',
+        element: <AdminLogin />
+      },
+      {
+        path: '/admin-panel',
+        element: <AdminLayout />,
+        children: [
+          {
+            path: 'dashboard',
+            element: <Dashboard></Dashboard>
+          },
+          {
+            path: 'product-update',
+            element: <div>Product Update Content</div>
+          },
+          {
+            path: 'upload-products',
+            element: <div>Product Upload Content</div>
+          },
+          {
+            path: 'product-category',
+            element: <div>Category Update Content</div>
+          },
+          {
+            path: 'headline-update',
+            element: <div>Headline Update Content</div>
+          },
+          {
+            path: 'banner-update',
+            element: <div>Banner Update Content</div>
+          }
+        ]
       }
     ]
   }
 ]);
 
-// Clear navigation history on page refresh
-window.addEventListener('beforeunload', () => {
-  navigationHistory = [];
-});
+
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ContextApiOne>
+      <RouterProvider router={router} />
+    </ContextApiOne>
   </StrictMode>
 );

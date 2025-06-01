@@ -37,7 +37,11 @@ const Checkout = () => {
                                 <p className="text-gray-600 mb-2">Payment method will go here</p>
                             </div>
 
-                            <Link to={'/provide-your-info'} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 md:py-4 rounded-lg w-full font-medium text-lg flex items-center justify-center gap-2">
+                            <Link
+                                to={'/provide-your-info'}
+                                state={{ from: '/checkout' }}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 md:py-4 rounded-lg w-full font-medium text-lg flex items-center justify-center gap-2"
+                            >
                                 <FaLock className="text-white" />
                                 Pay ${totalAmount.toFixed(2)}
                             </Link>
