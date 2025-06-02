@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import img1 from '../../assets/succe-im/Screenshot_33.png';
-import { FaCheckCircle, FaHeadset, FaShieldAlt, FaTimes } from 'react-icons/fa';
+import { FaCheckCircle, FaEnvelope, FaHeadset, FaShieldAlt, FaTimes } from 'react-icons/fa';
 import { ContextOne } from '../context-api-one/ContextApiOne';
 import ChatWindow from '../chat-window-page/ChatWindow';
 
@@ -47,6 +47,7 @@ const PaymentComplete = () => {
             </div>
 
             {/* Success Message & Support */}
+            {/* Success Message & Support */}
             <div className="flex flex-col justify-center items-center w-full max-w-md">
                 {/* Success Header */}
                 <div className="text-center">
@@ -61,12 +62,24 @@ const PaymentComplete = () => {
 
                 {/* Support Button */}
                 <button
-                    className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-medium md:font-semibold transition-all duration-300 transform hover:scale-105 shadow-md w-full sm:w-auto"
+                    className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-medium md:font-semibold transition-all duration-300 transform hover:scale-105 shadow-md w-full sm:w-auto mb-4"
                     onClick={() => setShowChat(true)}
                 >
                     <FaHeadset />
                     CONTACT SUPPORT TEAM
                 </button>
+
+                {/* Email Section */}
+                <div className="flex flex-col items-center mt-2">
+                    <div className="text-gray-500 text-sm mb-2">OR</div>
+                    <a
+                        href="mailto:support@evictioncheckres.com?subject=Support Request&body=Hello Support Team,"
+                        className="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 transition-colors hover:underline"
+                    >
+                        <FaEnvelope className="text-3xl" />
+                        <span className="font-medium">support@evictioncheckres.com</span>
+                    </a>
+                </div>
             </div>
 
             {/* Chat Window */}

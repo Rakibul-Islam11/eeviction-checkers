@@ -15,16 +15,16 @@ const HeroText = () => {
             </div>
 
             {/* Info Points */}
-            <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 text-white text-center">
-                <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-2 text-white text-center">
+                <div className="flex items-center gap-1">
                     <MdDoneOutline className="text-2xl sm:text-3xl" />
                     <p className="text-sm sm:text-base">7 days Trial with $1.00 Processing Fee</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                     <MdDoneOutline className="text-2xl sm:text-3xl" />
                     <p className="text-sm sm:text-base">Monthly membership of $39.95 after Trial</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                     <MdDoneOutline className="text-2xl sm:text-3xl" />
                     <p className="text-sm sm:text-base">To cancel, simply call +1315 250 0236</p>
                 </div>
