@@ -25,6 +25,12 @@ const AdminRole = () => {
             } catch (error) {
                 console.error("Error fetching users: ", error);
                 setLoading(false);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to load users',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         };
 
@@ -43,6 +49,20 @@ const AdminRole = () => {
             });
         } catch (error) {
             console.error("Error creating admin request: ", error);
+            throw error;
+        }
+    };
+
+    const updateUserRole = async (userId, newRole) => {
+        try {
+            const userRef = doc(db, 'users', userId);
+            await updateDoc(userRef, {
+                role: newRole
+            });
+            return true;
+        } catch (error) {
+            console.error("Error updating user role: ", error);
+            throw error;
         }
     };
 
@@ -51,10 +71,13 @@ const AdminRole = () => {
             setUpdatingUsers(prev => [...prev, userId]);
             const newRole = currentRole === 'admin' ? 'user' : 'admin';
 
-            // Create an admin request before actually updating the role
+            // First create the admin request
             await createAdminRequest(userId, email, newRole === 'admin' ? 'promote' : 'demote');
 
-            // Update local state optimistically
+            // Then actually update the user role in Firestore
+            await updateUserRole(userId, newRole);
+
+            // Update local state
             setUsers(users.map(user =>
                 user.id === userId ? { ...user, role: newRole } : user
             ));
@@ -62,8 +85,8 @@ const AdminRole = () => {
             setUpdatingUsers(prev => prev.filter(id => id !== userId));
 
             Swal.fire({
-                title: 'Request Submitted!',
-                text: `Admin request to ${newRole === 'admin' ? 'promote' : 'demote'} has been sent`,
+                title: 'Success!',
+                text: `User has been ${newRole === 'admin' ? 'promoted' : 'demoted'}`,
                 icon: 'success',
                 confirmButtonText: 'OK',
                 timer: 2000
@@ -73,7 +96,7 @@ const AdminRole = () => {
             setUpdatingUsers(prev => prev.filter(id => id !== userId));
             Swal.fire({
                 title: 'Error!',
-                text: 'Failed to submit admin request',
+                text: 'Failed to update user role',
                 icon: 'error',
                 confirmButtonText: 'OK'
             });
