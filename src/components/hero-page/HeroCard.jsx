@@ -27,10 +27,12 @@ const HeroCard = () => {
         {
             id: 3,
             title: 'Premium Semi-Annual Plan',
-            price: '239.70',
+            originalPrice: '239.70',
+            price: '199.00',
             cycle: 'Previous 6 months',
             setup: '',
-            isBestValue: true
+            isBestValue: true,
+            hasDiscount: true
         },
     ];
 
@@ -68,9 +70,26 @@ const HeroCard = () => {
                         <div className="p-4 sm:p-6 text-center flex flex-col justify-between gap-4 flex-grow">
                             <div>
                                 <h3 className="text-base sm:text-lg font-semibold mb-1">{plan.title}</h3>
-                                <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-1">
-                                    <span className="text-base sm:text-xl align-top">$</span>{plan.price}
-                                </div>
+                                {plan.hasDiscount ? (
+                                    <div className="mb-1">
+                                        <div className="relative inline-block">
+                                            <span className="text-2xl sm:text-3xl font-bold text-gray-400">
+                                                <span className="text-sm align-top">$</span>{plan.originalPrice}
+                                            </span>
+                                            <div className="absolute top-1/2 left-0 w-full h-0.5 bg-red-500 transform -translate-y-1/2"></div>
+                                        </div>
+                                        <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-red-600 mt-2">
+                                            <span className="text-base sm:text-xl align-top">$</span>{plan.price}
+                                        </div>
+                                        <div className="bg-red-100 text-red-600 text-xs sm:text-sm font-bold px-2 py-1 rounded-full inline-block mt-1">
+                                            SAVE ${(parseFloat(plan.originalPrice) - parseFloat(plan.price)).toFixed(2)}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-1">
+                                        <span className="text-base sm:text-xl align-top">$</span>{plan.price}
+                                    </div>
+                                )}
                                 <p className="text-gray-600 text-sm">{plan.cycle}</p>
                                 {plan.setup && <p className="text-gray-500 text-sm">{plan.setup}</p>}
                             </div>
