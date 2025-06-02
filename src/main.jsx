@@ -21,6 +21,7 @@ import AdminRole from './components/admin-pages/AdminRole.jsx';
 import PrivateAdminRoute from './components/admin-pages/PrivateAdminRoute.jsx';
 import PaymentInfo from './components/admin-pages/PaymentInfo.jsx';
 import PaymentMethoodUpdate from './components/admin-pages/PaymentMethoodUpdate.jsx';
+import PaymentUlUpdate from './components/admin-pages/PaymentUlUpdate.jsx';
 
 
 
@@ -115,6 +116,10 @@ const router = createBrowserRouter([
           {
             path: 'payment-method-update',
             element: <PaymentMethoodUpdate></PaymentMethoodUpdate>
+          },
+          {
+            path: 'bank-url-update',
+            element: <PaymentUlUpdate></PaymentUlUpdate>
           }
         ]
       }

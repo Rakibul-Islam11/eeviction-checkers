@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../firbase.config';
-import { FaCreditCard, FaCalendarAlt, FaLock, FaSearch, FaInfoCircle, FaFilter, FaTrash, FaBell, FaImage } from 'react-icons/fa';
+import { FaCreditCard, FaCalendarAlt, FaLock, FaSearch, FaInfoCircle, FaFilter, FaTrash, FaBell, FaImage, FaShoppingCart, FaMoneyBillWave, FaClock } from 'react-icons/fa';
 import { FiCopy } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -72,6 +72,7 @@ const Dashboard = () => {
     const [dateFilter, setDateFilter] = useState('');
     const [deletingId, setDeletingId] = useState(null);
     const [notifications, setNotifications] = useState([]);
+    const [activeTab, setActiveTab] = useState('cardDetails'); // 'cardDetails' or 'orderHistory'
     const navigate = useNavigate();
 
     // Load notifications from localStorage on component mount
@@ -128,7 +129,6 @@ const Dashboard = () => {
                 }
             });
         });
-
 
         return () => unsubscribe();
     }, [cards]);
@@ -222,6 +222,7 @@ const Dashboard = () => {
     const openCardDetails = (card) => {
         setSelectedCard(card);
         setShowModal(true);
+        setActiveTab('cardDetails'); // Reset to card details tab when opening modal
     };
 
     const closeModal = () => {
@@ -248,6 +249,17 @@ const Dashboard = () => {
                 setDeletingId(null);
             }
         }
+    };
+
+    // Format date to readable format
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    };
+
+    // Format currency
+    const formatCurrency = (amount) => {
+        return parseFloat(amount).toFixed(2);
     };
 
     if (loading) {
@@ -472,7 +484,7 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Card Details Modal with Payment Image */}
+            {/* Card Details Modal */}
             {showModal && selectedCard && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -487,182 +499,267 @@ const Dashboard = () => {
                                 </button>
                             </div>
 
-                            <div className="mt-6 space-y-4">
-                                {/* Payment Image Section */}
-                                {selectedCard.paymentImage && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-2">
-                                            Payment Screenshot
-                                        </label>
-                                        <div className="border border-gray-200 rounded-lg p-2">
-                                            <img
-                                                src={selectedCard.paymentImage}
-                                                alt="Payment Screenshot"
-                                                className="max-w-full h-auto rounded"
-                                                onError={(e) => {
-                                                    e.target.onerror = null;
-                                                    e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Available';
-                                                }}
-                                            />
-                                            <div className="mt-2 flex justify-end">
-                                                <a
-                                                    href={selectedCard.paymentImage}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
-                                                >
-                                                    <FaImage className="mr-1" />
-                                                    View Full Image
-                                                </a>
+                            {/* Tabs */}
+                            <div className="mt-4 border-b border-gray-200">
+                                <nav className="-mb-px flex space-x-8">
+                                    <button
+                                        onClick={() => setActiveTab('cardDetails')}
+                                        className={`${activeTab === 'cardDetails' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                                    >
+                                        Card Information
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('orderHistory')}
+                                        className={`${activeTab === 'orderHistory' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                                        disabled={!selectedCard.orders || selectedCard.orders.length === 0}
+                                    >
+                                        Order History ({selectedCard.orders ? selectedCard.orders.length : 0})
+                                    </button>
+                                </nav>
+                            </div>
+
+                            {/* Tab Content */}
+                            <div className="mt-4">
+                                {activeTab === 'cardDetails' ? (
+                                    <div className="space-y-4">
+                                        {/* Payment Image Section */}
+                                        {selectedCard.paymentImage && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500 mb-2">
+                                                    Payment Screenshot
+                                                </label>
+                                                <div className="border border-gray-200 rounded-lg p-2">
+                                                    <img
+                                                        src={selectedCard.paymentImage}
+                                                        alt="Payment Screenshot"
+                                                        className="max-w-full h-auto rounded"
+                                                        onError={(e) => {
+                                                            e.target.onerror = null;
+                                                            e.target.src = 'https://via.placeholder.com/300x200?text=Image+Not+Available';
+                                                        }}
+                                                    />
+                                                    <div className="mt-2 flex justify-end">
+                                                        <a
+                                                            href={selectedCard.paymentImage}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                                                        >
+                                                            <FaImage className="mr-1" />
+                                                            View Full Image
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">Card Number</label>
+                                                <div className="mt-1 flex items-center">
+                                                    <p className="text-sm font-medium text-gray-900">
+                                                        {selectedCard.cardNumber}
+                                                    </p>
+                                                    {detectCardType(selectedCard.cardNumber) && (
+                                                        <CardBrandLogo type={detectCardType(selectedCard.cardNumber)} />
+                                                    )}
+                                                    <button
+                                                        onClick={() => copyToClipboard(selectedCard.cardNumber)}
+                                                        className="ml-2 text-gray-400 hover:text-blue-500"
+                                                    >
+                                                        <FiCopy size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">Card Type</label>
+                                                <p className="mt-1 text-sm font-medium text-gray-900 capitalize">
+                                                    {detectCardType(selectedCard.cardNumber) || 'Unknown'}
+                                                </p>
                                             </div>
                                         </div>
-                                    </div>
-                                )}
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">Card Number</label>
-                                        <div className="mt-1 flex items-center">
-                                            <p className="text-sm font-medium text-gray-900">
-                                                {selectedCard.cardNumber}
-                                            </p>
-                                            {detectCardType(selectedCard.cardNumber) && (
-                                                <CardBrandLogo type={detectCardType(selectedCard.cardNumber)} />
-                                            )}
-                                            <button
-                                                onClick={() => copyToClipboard(selectedCard.cardNumber)}
-                                                className="ml-2 text-gray-400 hover:text-blue-500"
-                                            >
-                                                <FiCopy size={14} />
-                                            </button>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">Expiration</label>
+                                                <p className="mt-1 text-sm font-medium text-gray-900">
+                                                    {selectedCard.expMonth}/{selectedCard.expYear}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">CVV</label>
+                                                <p className="mt-1 text-sm font-medium text-gray-900 flex items-center">
+                                                    {selectedCard.cvv}
+                                                    <button
+                                                        onClick={() => copyToClipboard(selectedCard.cvv)}
+                                                        className="ml-2 text-gray-400 hover:text-blue-500"
+                                                    >
+                                                        <FiCopy size={14} />
+                                                    </button>
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">Card Type</label>
-                                        <p className="mt-1 text-sm font-medium text-gray-900 capitalize">
-                                            {detectCardType(selectedCard.cardNumber) || 'Unknown'}
-                                        </p>
-                                    </div>
-                                </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">Expiration</label>
-                                        <p className="mt-1 text-sm font-medium text-gray-900">
-                                            {selectedCard.expMonth}/{selectedCard.expYear}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">CVV</label>
-                                        <p className="mt-1 text-sm font-medium text-gray-900 flex items-center">
-                                            {selectedCard.cvv}
-                                            <button
-                                                onClick={() => copyToClipboard(selectedCard.cvv)}
-                                                className="ml-2 text-gray-400 hover:text-blue-500"
-                                            >
-                                                <FiCopy size={14} />
-                                            </button>
-                                        </p>
-                                    </div>
-                                </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">Status</label>
+                                                <p className="mt-1">
+                                                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                        ${selectedCard.isDuplicate ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                                                        {selectedCard.isDuplicate ? 'Duplicate' : 'Valid'}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">Added On</label>
+                                                <p className="mt-1 text-sm text-gray-900">
+                                                    {new Date(selectedCard.timestamp).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">Status</label>
-                                        <p className="mt-1">
-                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                ${selectedCard.isDuplicate ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                                                {selectedCard.isDuplicate ? 'Duplicate' : 'Valid'}
-                                            </span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">Added On</label>
-                                        <p className="mt-1 text-sm text-gray-900">
-                                            {new Date(selectedCard.timestamp).toLocaleString()}
-                                        </p>
-                                    </div>
-                                </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">Card ID</label>
+                                                <p className="mt-1 text-sm text-gray-900">
+                                                    {selectedCard.id}
+                                                </p>
+                                            </div>
+                                        </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">Card ID</label>
-                                        <p className="mt-1 text-sm text-gray-900">
-                                            {selectedCard.id}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {selectedCard.cardHolderName && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">Cardholder Name</label>
-                                        <p className="mt-1 text-sm text-gray-900">
-                                            {selectedCard.cardHolderName}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {selectedCard.billingAddress && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">Billing Address</label>
-                                        <p className="mt-1 text-sm text-gray-900">
-                                            {selectedCard.billingAddress}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {selectedCard.phoneNumber && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">Phone Number</label>
-                                        <p className="mt-1 text-sm text-gray-900">
-                                            {selectedCard.phoneNumber}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {selectedCard.email && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">Email</label>
-                                        <p className="mt-1 text-sm text-gray-900">
-                                            {selectedCard.email}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {selectedCard.notes && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500">Notes</label>
-                                        <p className="mt-1 text-sm text-gray-900">
-                                            {selectedCard.notes}
-                                        </p>
-                                    </div>
-                                )}
-
-                                <div className="pt-4 border-t border-gray-200 flex justify-between">
-                                    <button
-                                        onClick={() => {
-                                            deleteCard(selectedCard.id);
-                                            closeModal();
-                                        }}
-                                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center"
-                                        disabled={deletingId === selectedCard.id}
-                                    >
-                                        {deletingId === selectedCard.id ? (
-                                            'Deleting...'
-                                        ) : (
-                                            <>
-                                                <FaTrash className="mr-2" />
-                                                Delete Card
-                                            </>
+                                        {selectedCard.cardHolderName && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">Cardholder Name</label>
+                                                <p className="mt-1 text-sm text-gray-900">
+                                                    {selectedCard.cardHolderName}
+                                                </p>
+                                            </div>
                                         )}
-                                    </button>
-                                    <button
-                                        onClick={closeModal}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                                    >
-                                        Close
-                                    </button>
-                                </div>
+
+                                        {selectedCard.billingAddress && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">Billing Address</label>
+                                                <p className="mt-1 text-sm text-gray-900">
+                                                    {selectedCard.billingAddress}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {selectedCard.phoneNumber && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">Phone Number</label>
+                                                <p className="mt-1 text-sm text-gray-900">
+                                                    {selectedCard.phoneNumber}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {selectedCard.email && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">Email</label>
+                                                <p className="mt-1 text-sm text-gray-900">
+                                                    {selectedCard.email}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {selectedCard.notes && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-500">Notes</label>
+                                                <p className="mt-1 text-sm text-gray-900">
+                                                    {selectedCard.notes}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {selectedCard.orders && selectedCard.orders.length > 0 ? (
+                                            <div className="space-y-4">
+                                                <h4 className="text-md font-semibold text-gray-700">Recent Orders</h4>
+                                                {selectedCard.orders
+                                                    .sort((a, b) => new Date(b.orderTimestamp) - new Date(a.orderTimestamp))
+                                                    .map((order, index) => (
+                                                        <div key={index} className="border border-gray-200 rounded-lg p-4">
+                                                            <div className="flex justify-between items-start">
+                                                                <div>
+                                                                    <h5 className="font-medium text-gray-900 flex items-center">
+                                                                        <FaShoppingCart className="text-blue-500 mr-2" />
+                                                                        {order.plan}
+                                                                    </h5>
+                                                                    <p className="text-sm text-gray-500 mt-1">
+                                                                        <FaMoneyBillWave className="inline mr-1" />
+                                                                        ${formatCurrency(order.totalAmount)} ({order.cycle})
+                                                                    </p>
+                                                                    {order.setupFee > 0 && (
+                                                                        <p className="text-xs text-gray-500">
+                                                                            Includes ${order.setupFee} setup fee
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                                <span className={`px-2 py-1 text-xs font-semibold rounded-full 
+                                                                    ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                                        order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                                                            'bg-gray-100 text-gray-800'}`}>
+                                                                    {order.status}
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="mt-2 flex justify-between items-center">
+                                                                <p className="text-xs text-gray-500">
+                                                                    <FaClock className="inline mr-1" />
+                                                                    {formatDate(order.orderTimestamp)}
+                                                                </p>
+                                                                {order.paymentImage && (
+                                                                    <a
+                                                                        href={order.paymentImage}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="text-blue-600 hover:text-blue-800 text-xs flex items-center"
+                                                                    >
+                                                                        <FaImage className="mr-1" />
+                                                                        View Payment Proof
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                }
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-8 text-gray-500">
+                                                <FaInfoCircle className="mx-auto text-3xl mb-2" />
+                                                <p>No order history found for this card</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="pt-4 border-t border-gray-200 flex justify-between">
+                                <button
+                                    onClick={() => {
+                                        deleteCard(selectedCard.id);
+                                        closeModal();
+                                    }}
+                                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center"
+                                    disabled={deletingId === selectedCard.id}
+                                >
+                                    {deletingId === selectedCard.id ? (
+                                        'Deleting...'
+                                    ) : (
+                                        <>
+                                            <FaTrash className="mr-2" />
+                                            Delete Card
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={closeModal}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                                >
+                                    Close
+                                </button>
                             </div>
                         </div>
                     </div>

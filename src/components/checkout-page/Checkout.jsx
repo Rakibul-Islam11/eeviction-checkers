@@ -1,9 +1,17 @@
+
+
+
 import { Link, useLocation } from 'react-router-dom';
 import { FaLock, FaShieldAlt } from 'react-icons/fa';
+import { useContext } from 'react';
+import { ContextOne } from '../context-api-one/ContextApiOne';
+
+
 
 const Checkout = () => {
     const location = useLocation();
     const { selectedPlan } = location.state || {};
+    const { setProductPurchaseData } = useContext(ContextOne); // Context থেকে ফাংশন নিন
 
     if (!selectedPlan) {
         return (
@@ -19,6 +27,17 @@ const Checkout = () => {
         ? parseFloat(selectedPlan.price) + 3
         : parseFloat(selectedPlan.price);
 
+    // প্রোডাক্ট ডাটা প্রস্তুত করুন এবং Context-এ সেট করুন
+    const productData = {
+        plan: selectedPlan.title,
+        price: selectedPlan.price,
+        cycle: selectedPlan.cycle,
+        setupFee: selectedPlan.setup ? 3 : 0,
+        totalAmount: totalAmount.toFixed(2)
+    };
+
+    // Context-এ ডাটা সেট করুন
+    setProductPurchaseData(productData);
 
     return (
         <div className="max-w-6xl mx-auto p-6 min-h-screen">

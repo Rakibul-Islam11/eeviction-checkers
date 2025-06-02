@@ -136,6 +136,14 @@ export default function AdminNavbar() {
                             Payment Method Update
                         </Link>
                     </li>
+                    <li>
+                        <Link
+                            to="bank-url-update"
+                            className={`hover:text-yellow-300 ${isActive('payment-method-update') ? 'text-yellow-300 border-b-2 border-yellow-300' : ''}`}
+                        >
+                            bank url & name update
+                        </Link>
+                    </li>
                 </ul>
             </div>
         </nav>
